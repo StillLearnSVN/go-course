@@ -1,0 +1,104 @@
+// Now we'll move to Go Data Types
+	// Go has several built-in data types, including:
+	// Make it clearly with explanation of each data type
+	// 1. int: Represents integer values. The size of int depends on the architecture (32-bit or 64-bit).
+
+	// 2. float64: Represents floating-point numbers with double precision (64 bits).
+	// 3. string: Represents a sequence of characters (text). Strings are immutable in Go.
+	// 4. bool: Represents a boolean value, which can be either true or false.
+	// 5. array: Represents a fixed-size sequence of elements of the same type. The size is defined at compile time.
+	// 6. slice: Represents a dynamically-sized sequence of elements of the same type. Slices are more flexible than arrays.
+	// 7. map: Represents a collection of key-value pairs, where each key is unique. Maps are unordered.
+	// 8. struct: Represents a composite data type that groups together variables (fields) of different types.
+	// 9. interface: Represents a contract that defines a set of methods. Types that implement these methods satisfy the interface.
+	// 10. channel: Represents a communication mechanism for goroutines to synchronize and share data.
+	// 11. function: Represents a block of code that can be executed. Functions can take parameters and return values.
+	// 12. pointer: Represents a memory address of a value. Pointers allow direct manipulation of memory.
+	// 13. rune: Represents a Unicode code point (int32). Runes are used to represent characters in Go.
+	// 14. byte: Represents an alias for uint8. Bytes are used to represent binary data.
+
+	// Now let's break down the data types with examples
+	// 1. int
+	var age int = 25
+	fmt.Println("Age:", age)
+
+	// 2. float64
+	var height float64 = 5.9
+	fmt.Println("Height:", height)
+
+	// 3. string
+	var name string = "John Doe"
+	fmt.Println("Name:", name)
+
+	// 4. bool
+	var isStudent bool = true
+	fmt.Println("Is Student:", isStudent)
+
+	// 5. array
+	var numbers [5]int = [5]int{1, 2, 3, 4, 5}
+	fmt.Println("Numbers:", numbers)
+
+	// 6. slice
+	var fruits []string = []string{"Apple", "Banana", "Cherry"}
+	fmt.Println("Fruits:", fruits)
+
+	// 7. map
+	var person map[string]string = map[string]string{"name": "Alice", "age": "30"}
+	fmt.Println("Person:", person)
+
+	// 8. struct
+	type Person struct {
+		Name string
+		Age  int
+	}
+	var p Person = Person{Name: "Bob", Age: 40}
+	fmt.Println("Person Struct:", p)
+
+	// 9. interface
+	type Animal interface {
+		Speak() string
+	}
+
+	type Dog struct{}
+	func (d Dog) Speak() string {
+		return "Woof!"
+	}
+	type Cat struct{}
+	func (c Cat) Speak() string {
+		return "Meow!"
+	}
+	// Using the interface
+	// We can create a variable of type Animal and assign it a Dog or Cat
+	// This allows us to use polymorphism, where we can treat different types as the same interface type.
+	// This is useful for writing generic code that can work with different types.
+
+	var myDog Animal = Dog{}
+	fmt.Println("Dog speaks:", myDog.Speak())
+
+
+	// 10. channel
+	var ch chan int = make(chan int)
+	go func() {
+		ch <- 42
+	}
+	fmt.Println("Channel value:", <-ch)
+
+
+	// 11. function
+	func add(a int, b int) int {
+		return a + b
+	}
+	sum := add(5, 10)
+	fmt.Println("Sum:", sum)
+
+	// 12. pointer
+	var ptr *int = &age
+	fmt.Println("Pointer value:", *ptr)
+
+	// 13. rune
+	var char rune = 'A'
+	fmt.Println("Rune character:", string(char))
+	
+	// 14. byte
+	var b byte = 'B'
+	fmt.Println("Byte character:", string(b))

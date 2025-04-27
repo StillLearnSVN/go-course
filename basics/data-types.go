@@ -1,0 +1,35 @@
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello " + "World")
+	fmt.Println("9 X 11 = ", 9*11)
+	fmt.Println("180.18 / 3.0 = ", 180.18/3.0)
+	fmt.Println("true && false = ", true && false)
+	fmt.Println("true || false = ", true || false)
+	fmt.Println("!true = ", !true)
+}
+
+// Go has several built-in data types, including:
+// Make it clearly with explanation of each data type
+// 1. int: Represents integer values. The size of int depends on the architecture (32-bit or 64-bit).
+
+// 2. float64: Represents floating-point numbers with double precision (64 bits).
+// 3. string: Represents a sequence of characters (text). Strings are immutable in Go.
+// 4. bool: Represents a boolean value, which can be either true or false.
+// 5. array: Represents a fixed-size sequence of elements of the same type. The size is defined at compile time.
+// 6. slice: Represents a dynamically-sized sequence of elements of the same type. Slices are more flexible than arrays.
+// 7. map: Represents a collection of key-value pairs, where each key is unique. Maps are unordered.
+// 8. struct: Represents a composite data type that groups together variables (fields) of different types.
+// 9. interface: Represents a contract that defines a set of methods. Types that implement these methods satisfy the interface.
+// 10. channel: Represents a communication mechanism for goroutines to synchronize and share data.
+// 11. function: Represents a block of code that can be executed. Functions can take parameters and return values.
+// 12. pointer: Represents a memory address of a value. Pointers allow direct manipulation of memory.
+// 13. rune: Represents a Unicode code point (int32). Runes are used to represent characters in Go.
+// 14. byte: Represents an alias for uint8. Bytes are used to represent binary data.
+
+// Explain why in go when we are declaring package, the package name should be same as the directory name
+
+// Why i got this when i run the code:
+// package command-line-arguments is not a main package

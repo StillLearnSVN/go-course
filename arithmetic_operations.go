@@ -1,0 +1,78 @@
+package main
+
+import (
+	"fmt"
+	"math"
+)
+
+func main() {
+	var a, b int = 5, 3
+
+	// Addition
+	result := a + b
+	fmt.Println("Addition:", result)
+
+	// Subtraction
+	result = a - b
+	fmt.Println("Subtraction:", result)
+
+	// Multiplication
+	result = a * b
+	fmt.Println("Multiplication:", result)
+
+	// Division
+	result = a / b
+	fmt.Println("Division:", result)
+
+	// Modulus
+	result = a % b
+	fmt.Println("Modulus:", result)
+
+	// When we do arithmetic operations, somehow we face several issues.
+	// For example, Overflow, underflow, division by zero, etc.
+	// In Go, the language itself handles these issues.
+	// For example, if we try to divide by zero, it will panic.
+	// Uncomment the following line to see the panic
+	// result = a / 0
+	// fmt.Println("Division by zero:", result)
+	// Uncomment the following line to see the panic
+
+	// And for overflow and underflow, Go will not panic but will give the result as per the rules of arithmetic.
+	// For example, if we try to add two large numbers, it will not panic but will give the result as per the rules of arithmetic.
+	
+	// Overflow example for signed int
+	var maxInt int = 1<<63 - 1 // Maximum value for int64
+	// What does 1 << 63 - 1 mean?
+	// 1 << 63 means 1 shifted left by 63 bits, which is 2^63.
+	// So, 1 << 63 - 1 means 2^63 - 1, which is the maximum value for int64.
+	// If we add 1 to this value, it will overflow and give us a negative number.
+	// This is because the maximum value for int64 is 2^63 - 1, and if we add 1 to it, it will overflow and give us a negative number.
+	// This is called overflow.
+	fmt.Println("Max Int:", maxInt)
+	var overflowedInt int = maxInt + 1
+	fmt.Println("Overflowed Int:", overflowedInt)
+
+	// Other overflow examples, for unsigned int
+	var maxUint uint = 1<<64 - 1 // Maximum value for uint64
+	// What does 1 << 64 - 1 mean?
+	// 1 << 64 means 1 shifted left by 64 bits, which is 2^64.
+	// So, 1 << 64 - 1 means 2^64 - 1, which is the maximum value for uint64.
+	// If we add 1 to this value, it will overflow and give us 0.
+	// This is because the maximum value for uint64 is 2^64 - 1, and if we add 1 to it, it will overflow and give us 0.
+	// This is called overflow.
+	fmt.Println("Max Uint:", maxUint)
+	var overflowedUint uint = maxUint + 1
+	fmt.Println("Overflowed Uint:", overflowedUint)
+
+	// Underflow example for Float
+	var smallFloat float64 = 1.0e-300 // Smallest value for float64	
+	// What does 1.0e-300 mean?
+	// 1.0e-300 means 1.0 * 10^-300, which is a very small number.
+	// If we subtract 1.0e-300 from 1.0, it will give us 1.0.
+	// This is because the smallest value for float64 is 1.0e-300, and if we subtract 1.0e-300 from 1.0, it will give us 1.0.
+	// This is called underflow.
+	fmt.Println("Small Float:", smallFloat)
+	fmt.Println("Max Float:", math.MaxFloat64)
+	var underflowedFloat float64 = smallFloat / math.MaxFloat64
+	fmt.Println("Underflowed Float:", underflowedFloat)
+}

@@ -1,4 +1,4 @@
-package main
+package basics
 
 func main() {
 	// Initialize a slice of integers

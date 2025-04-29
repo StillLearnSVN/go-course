@@ -1,0 +1,45 @@
+package main
+
+
+import (
+	"fmt"
+	"os"
+	"strconv"
+)
+
+func isPrime(n int) bool {
+	if n <= 1 {
+		return false
+	}
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Please provide a number as an argument.")
+		return
+	}
+
+	num, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		fmt.Println("Invalid number. Please provide a valid integer.")
+		return
+	}
+
+	if num%2 == 0 {
+		fmt.Println("The number is even")
+	} else {
+		fmt.Println("The number is odd")
+	}
+
+	if isPrime(num) {
+		fmt.Println("The number is prime")
+	} else {
+		fmt.Println("The number is not prime")
+	}
+}

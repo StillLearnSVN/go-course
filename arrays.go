@@ -1,0 +1,86 @@
+package main
+
+import "fmt"
+
+func main() {
+
+	// Arrays have fixed sizes and are value types, they offer simplicity and direct access
+	//
+
+
+	// var arrayName [size]ElementType
+
+	// var numbers [5]int
+	// // fmt.Println(numbers)
+	// numbers[0] = 1
+
+	// fruits := [5]string{"apple", "banana", "cherry", "date", "elderberry"}
+
+	// fmt.Println("Fruits:", fruits)
+
+	// // Print third element
+	// fmt.Println("Third fruit:", fruits[2])
+
+	// // Copying an array
+	// copiedArray := originalArray
+
+	// copiedArray[0] = 99
+
+	// fmt.Println("Original Array:", originalArray)
+	// fmt.Println("Copied Array:", copiedArray)
+
+	// for i := 0; i < len(numbers); i++ {
+	// 	fmt.Println("Element at index:", i, "Value:", numbers[i])
+	// }
+
+	// Underscore means that we do not intend to use the value that the underscore is storing
+	// Underscore is blan identifier, used to store unused values
+
+	// for _, v := range numbers {
+	// 	fmt.Printf("Value: %d\n", v)
+	// }
+
+	// fmt.Println("The length of numbers array is:", len(numbers))
+
+	// Comparing Arrays
+	// array1 := [3]int{1, 2, 3}
+	// array2 := [3]int{1, 2, 3}
+	// fmt.Println("Array1 is equal to Array2:", array1 == array2)
+
+	// var matrix [3][3]int = [3][3]int{ // Have 3 rows and 3 columns
+	// {1, 2, 3},
+	// {4, 5, 6},
+	// {7, 8, 9},
+	// }
+
+	// fmt.Println("Matrix:", matrix)
+
+	// a, _ := someFunc() // This will ignore the second return value which is 2
+	// fmt.Println(a)
+
+	// The underscore is also used to ignore the first return value
+	// in a function that returns multiple values
+	// In this case, we are ignoring the first return value
+	// and only using the second return value
+	// _, b := someFunc() // This will ignore the first return value which is 1
+	// fmt.Println(b)
+
+	originalArray := [5]int{11, 22, 33, 44, 55} // Declare and initialize an array of 5 integers
+	var copiedArray *[5]int                     // Declare a pointer to an array of 5 integers
+
+	copiedArray = &originalArray // Assign the address of originalArray to copiedArray
+	copiedArray[0] = 99          // Modify the first element of the array via the pointer
+
+	fmt.Println("Original Array:", originalArray) // Print the original array (reflects the change)
+	fmt.Println("Copied Array:", *copiedArray)    // // Print the dereferenced copied array (same as originalArray)
+
+	/*
+		Pointer to Array: copiedArray is a pointer to the array originalArray. This means both variables reference the same underlying data in memory.
+	Shared Data: Modifying copiedArray[0] directly changes the value in originalArray because they share the same memory location.
+	Output: Both originalArray and *copiedArray will display the same values since they point to the same data.
+	*/
+}
+
+// func someFunc() (int, int) {
+// 	return 1, 2
+// }

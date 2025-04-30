@@ -1,0 +1,48 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func main() {
+	// func functionName(parameter1 type1, parameter2 type2, ...) (returnType1, returnType2, ...) {
+	// 	// function body or code block
+	// 	return value1, value2
+	// }
+	q, r := divide(10, 3)
+	fmt.Printf("Quotient: %d, Remainder: %d\n", q, r)
+
+	result, err := compare(5, 5)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println(result)
+	}
+
+}
+
+func divide(a, b int) (quotient int, remainder int) {
+	if b == 0 {
+		return 0, 0
+	}
+	quotient = a / b
+	remainder = a % b
+	return
+}
+
+func compare(a, b int) (string, error) {
+	if a > b {
+		return "a is greater than b", nil
+	} else if a < b {
+		return "a is less than b", nil
+	} else {
+		return "", errors.New("Unable to compare which is greater")
+	}
+}
+
+// So in conclusion, the function can return multiple values of different types. The return values can be named or unnamed. 
+// Named return values are useful for documentation and readability, while unnamed return values are more concise. 
+// You can also return an error value to indicate success or failure of the function. This is a common pattern in Go programming.
+// Also multiple return values in go enable concise and expressive function design by allowing functions to return multiple values simultaneously.
+// This feature enhances error handling, data extraction, efficiency, and overall code clarity.

@@ -1,0 +1,56 @@
+1. Why does Go require a runtime even though it compiles to machine code?
+
+--> Because the Go routine manages essential features like garbage collection
+and concurrency
+
+explanation:
+Even though Go is a compiled language, it still requires a runtime to handle critical aspects of program execution. 
+The Go runtime is responsible for automatic garbage collection (GC), goroutine scheduling for concurrency, memory management, 
+and other essential runtime support functions. Unlike interpreted languages (like Python, which needs an interpreter to run source code), 
+Go compiles directly to machine code. However, the compiled Go program still depends on the runtime for efficient execution.
+
+2. How does Go optimize imported packages to reduce the final executable size?
+
+--> By using tree shaking to remove unused functions and definitions from imported packages during compilation
+
+explanation:
+Go’s compiler and linker perform optimizations similar to tree shaking, which means that even though an entire package is imported, 
+only the parts of the package that are actually used in the code contribute to the final executable size. Unused functions, types, 
+and other definitions from the imported package are discarded during the compilation process.
+
+3. Which statement about Go maps is correct?
+A) ❌ Maps in Go are dynamically sized; you don't need to preallocate capacity (though you can hint capacity using make).
+
+C) ❌ Iterating over a Go map does not guarantee any order (not even insertion order).
+
+D) ❌ Deleting from a map doesn't involve shifting elements — maps are unordered, so no "order" is maintained anyway.
+
+--> B) The zero value of a map is nil, meaning it must be initialized before use.
+
+explanation:
+In Go, the zero value of a map is nil, which means a declared but uninitialized map cannot store key-value pairs until it is explicitly 
+initialized using make or a map literal. A nil map will cause a runtime panic if you attempt to add elements to it.
+
+4. What is a key advantage of using multiple return values in Go?
+A) ❌ Go functions can return multiple values, but it's not unlimited — it's still constrained by practical limits like stack size.
+
+B) ❌ Go does not always return pointers to improve performance; it depends on the situation.
+
+D) ❌ Functions must return values in the order specified in the function signature (not necessarily the body).
+
+--> C) It enables efficient error handling by returning both results and error values.
+
+explanation:
+One of the key advantages of multiple return values in Go is their role in error handling. Functions can return both a primary result 
+and an error value, allowing the caller to check if the function executed successfully. This pattern avoids the need for exceptions and 
+makes error handling explicit and efficient.
+
+5. What is a key rule when defining a variadic function in Go?
+
+--> A variadic parameter must always be the last parameter in the function signature
+
+explanation:
+In Go, a variadic function can accept a variable number of arguments, but it has a strict rule: the variadic parameter must be the last 
+parameter in the function signature. This ensures that Go can properly differentiate between regular parameters and the variadic list.
+
+

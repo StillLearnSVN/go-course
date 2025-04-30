@@ -1,0 +1,34 @@
+package main
+
+import "fmt"
+
+func main() {
+
+	// In Go, the panic function is used to raise a panic condition.
+	// A panic is a runtime error that occurs when the program encounters an unexpected condition.
+	// When a panic occurs, the program stops executing and starts to unwind the stack.
+	// The panic function takes a single argument, which is the value that will be passed to the recover function.
+	// The recover function is used to regain control of the program after a panic has occurred.
+
+	// This is a simple program that demonstrates how to use the panic function in Go.
+	// The program will panic with a message and then recover from the panic.
+	// The program will then print the message "Recovered from panic" and exit.
+
+	// Call the function that panics
+	panicFunction(10)
+	panicFunction(-1)
+
+	// Panicked only after running the deferred functions
+}
+
+func panicFunction(input int) {
+
+	defer fmt.Println("Deferred 1")
+	defer fmt.Println("Deferred 2")
+	if input < 0 {
+		fmt.Println("Before panic")
+		panic("input must be non-negative number")
+		// fmt.Println("After panic") // This line will not be executed
+	}
+	fmt.Println("Processing input:", input)
+}

@@ -1,0 +1,25 @@
+package main
+
+import "fmt"
+
+func main() {
+	process()
+	fmt.Println("Returned from process")
+}
+
+func process() {
+	// This function is a placeholder for the actual processing logic.
+	// You can implement the logic here as per your requirements.
+
+	defer func () {
+		// if r := recover(); r != nil {
+		r := recover()
+		if r != nil {
+			fmt.Println("Recovered from panic:", r)
+		} 
+	} ()
+
+	fmt.Println("Processing...")
+	// Simulate a panic
+	panic("Something went wrong!")
+}

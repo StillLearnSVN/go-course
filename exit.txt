@@ -1,0 +1,22 @@
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	// The practical use of os.Exit is to terminate the program with a specific exit code.
+	// The exit code is a numeric value that indicates the success or failure of the program.
+	// A common convention is to use 0 for success and non-zero values for different types of errors.
+	// For example, you might use 1 for a general error, 2 for a file not found error, etc.
+	// In this example, we will use os.Exit(1) to indicate an error.
+	// The os.Exit function does not return, so any code after it will not be executed.
+
+	defer fmt.Println("Deferred statement")
+
+	fmt.Println("Starting program")
+	os.Exit(1) // Exit with status code 1
+
+	fmt.Println("This line will not be executed")
+}

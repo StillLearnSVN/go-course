@@ -1,0 +1,70 @@
+package main
+
+import "fmt"
+
+func main() {
+	// Recursion is a fundamental concept in programming, where a function calls itself directly or indirectly in order to solve problem.
+	fmt.Println(factorial(5))
+	fmt.Println(factorial(4))
+
+	fmt.Println(sumOfDigits(9))
+	fmt.Println(sumOfDigits(14))
+	fmt.Println(sumOfDigits(1234))
+
+	numTerms := 10
+
+	fmt.Println("Fibonacci sequence (iterative):", fibonacciIterative(numTerms))
+
+	fmt.Print("Fibonacci sequence (recursive):")
+	for i := range numTerms {
+		fmt.Printf("%d ", fibonacciRecursive(i))
+	}
+	fmt.Println()
+
+}
+
+func factorial(n int) int {
+	// Base case: factorial of 0 is 1
+	if n == 0 {
+		return 1
+	}
+
+	// Recursive case: factorial n is n * factorial(n - 1)
+	return n * factorial(n-1)
+	// n * (n-1) * (n-2) * factorial(n-3 ...)
+}
+
+func sumOfDigits(n int) int {
+	// Base case
+	if n < 10 {
+		return n
+	}
+
+	return n%10 + sumOfDigits(n/10)
+}
+
+// Iterative approach
+func fibonacciIterative(n int) []int {
+	if n <= 0 {
+		return []int{}
+	}
+	result := make([]int, n)
+	if n >= 1 {
+		result[0] = 0
+	}
+	if n >= 2 {
+		result[1] = 1
+	}
+	for i := 2; i < n; i++ {
+		result[i] = result[i-1] + result[i-2]
+	}
+	return result
+}
+
+// Recursive approach
+func fibonacciRecursive(n int) int {
+	if n <= 1 {
+		return n
+	}
+	return fibonacciRecursive(n-1) + fibonacciRecursive(n-2)
+}

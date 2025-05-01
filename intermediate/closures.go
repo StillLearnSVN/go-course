@@ -1,0 +1,42 @@
+package main
+
+import "fmt"
+
+func main() {
+
+	// In Go, closures are useful for creating functions that maintain state across multiple calls without exposing the state directly.
+	// This help encapsulate functionality and data, allowing for cleaner and more modular code.
+	// Closures are commonly used in callback functions, where they capture variables to provide context or maintain state
+	// during asynchronous operations.
+
+	// sequence := adder()
+
+	// fmt.Println(sequence())
+	// fmt.Println(sequence())
+	// fmt.Println(sequence())
+
+	substracter := func() func(int) int {
+		countdown := 99
+		return func(x int) int {
+			countdown -= x
+			return countdown
+		}
+	}()
+
+	fmt.Println(substracter(1))
+	fmt.Println(substracter(2))
+	fmt.Println(substracter(3))
+	fmt.Println(substracter(4))
+	fmt.Println(substracter(5))
+}
+
+// func adder() func() int {
+// 	i := 0
+// 	fmt.Println("previous value of i:", i)
+
+// 	return func() int {
+// 		i++
+// 		fmt.Println("added 1 to i")
+// 		return i
+// 	}
+// }

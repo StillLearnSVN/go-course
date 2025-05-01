@@ -1,0 +1,76 @@
+package main
+
+import (
+	"fmt"
+	"unicode/utf8"
+)
+
+func main() {
+	message := "Hello, \nGo!"
+	msg1 := "Hello, \tGo!"
+	msg2 := `Hello\nGo`
+
+	fmt.Println(message)
+	fmt.Println(msg1)
+	fmt.Println(msg2)
+
+	fmt.Println("Length of msg2 variable is", len(msg2))
+	fmt.Println("The first character in message var is", message[0]) //ASCII
+
+	greeting := "Hello "
+	name := "Samm!"
+	fmt.Println(greeting + name)
+
+	str1 := "Apple" // A has an ASCII value of 65
+	str := "apple" // a has an ASCII value of 97
+	str2 := "banana" // b has an ASCII value 0f 98
+	str3 := "app" // a has an ASCII value of 97
+
+	fmt.Println(str1 < str2)
+	fmt.Println(str3 < str1)
+	fmt.Println(str < str1)
+	fmt.Println(str1 < str3)
+
+	for _, char := range message {
+		// fmt.Printf("Character at index %d is %c\n", i, char)
+		fmt.Printf("%v\n", char)
+	}
+
+	fmt.Println("Rune count: ", utf8.RuneCountInString(greeting))
+
+	greetingWithName := greeting + name
+	fmt.Println(greetingWithName)
+
+	var ch rune = 'a'
+	jch := 'カ'
+
+	fmt.Println(ch)
+	fmt.Println(jch)
+
+	fmt.Printf("%c\n", ch)
+	fmt.Printf("%c\n", jch)
+
+	cstr := string(ch)
+	fmt.Println(cstr)
+
+	fmt.Printf("Type of ch is %T\n", ch)
+	fmt.Printf("Type of cstr is %T\n", cstr)
+
+	const NIHONGO = "日本語" // Japanese text
+	fmt.Println(NIHONGO)
+
+	jhello := "こんにちは" // Japanese "Hello"
+
+	for _, runeValue := range jhello {
+		fmt.Printf("%c\n", runeValue)
+	}
+
+	smiley := '😊'
+	fmt.Printf("%v\n", smiley)
+	fmt.Printf("%c\n", smiley)
+
+	// String provide a convenient abstraction for working with textual data
+	// While RUne, enable precise handling of individual characters and support for diverse languages
+
+	
+}

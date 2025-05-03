@@ -1,8 +1,5 @@
 package intermediate
 
-func main() {
-	package intermediate
-
 import "fmt"
 
 func main() {
@@ -57,5 +54,4 @@ func checkAge(age int) error {
 		return fmt.Errorf("Age %d is too young to drive.", age)
 	}
 	return nil
-}
 }

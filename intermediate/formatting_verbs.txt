@@ -33,7 +33,7 @@ func main() {
 	// %#x	Base 16, with leading 0x
 	// %4d	Pad with spaces (width 4, right justified)
 	// %-4d	Pad with spaces (width 4, left justified)
-	// %04d	Pad with zeroes (width 4
+	// %04d	Pad with zeroes (width 4)
 
 	// int := 255
 

@@ -5,6 +5,19 @@ import (
 	"math"
 )
 
+/*
+Syntax:
+type InterfaceName interface {
+    Method1() returnType
+    Method2() returnType
+}
+*/
+
+// In Go, to implement an interface, a type must define all methods declared by the interface. 
+// Implementation is implicit, meaning no keyword (such as implements) is needed.
+
+// THis is an interface that requires any type of implementing to it to have
+// area and perimeter method
 type geometry interface {
 	area() float64
 	perim() float64
@@ -14,12 +27,19 @@ type circle struct {
 	radius float64
 }
 
+// Method implementations
+// The circle struct implements the geometry interface by defining 
+// the area() and perim() methods:
+
 func (c circle) area() float64 {
 	return math.Pi * c.radius * c.radius
 }
 func (c circle) perim() float64 {
 	return 2 * math.Pi * c.radius
 }
+
+// THis is additional method, The diameter() method is specific to the circle struct and is not part of the geometry interface.
+// This means it cannot be called on a geometry interface type, only on a circle type.
 func (c circle) diameter() float64 {
 	return 2 * c.radius
 }
@@ -86,3 +106,5 @@ func myPrinter(i ...interface{}) {
 		fmt.Println(v)
 	}
 }
+
+// Interfaces are named collections of method signatures.

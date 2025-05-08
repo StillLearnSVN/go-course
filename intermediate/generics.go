@@ -1,0 +1,101 @@
+package main
+
+import "fmt"
+
+// func swap[T any](a, b T) (T, T) {
+// 	return b, a
+// }
+
+// The Stack[T any] type is a generic struct that represents a stack.
+//  It uses a slice, elements []T, to store the stack's elements. 
+// The [T any] syntax specifies that T can be any type, making the stack 
+// flexible enough to handle integers, strings, or any other type.
+type Stack[T any] struct {
+	elements []T
+}
+
+/*
+push(element T): This method adds an element of type T to the stack. \
+It uses the append function to add the element to the elements slice, 
+which dynamically grows as new elements are added.
+*/
+func (s *Stack[T]) push(element T) {
+	s.elements = append(s.elements, element)
+}
+
+
+/*
+pop() (T, bool): This method removes and returns the top element of the stack. 
+If the stack is empty, it returns the zero value of type T (e.g., 0 for integers, "" for strings) 
+and false. Otherwise, it retrieves the last element of the slice, removes it by slicing off the last index, 
+and returns the element along with true.
+*/
+func (s *Stack[T]) pop() (T, bool) {
+	if len(s.elements) == 0 {
+		var zero T
+		return zero, false
+	}
+	element := s.elements[len(s.elements)-1]
+	s.elements = s.elements[:len(s.elements)-1]
+	return element, true
+}
+
+func (s *Stack[T]) isEmpty() bool {
+	return len(s.elements) == 0
+}
+
+func (s Stack[T]) printAll() {
+	if len(s.elements) == 0 {
+		fmt.Println("The stack is empty.")
+		return
+	}
+	fmt.Print("Stack elements: ")
+	for _, element := range s.elements {
+		fmt.Print(element)
+	}
+	fmt.Println()
+}
+
+func main() {
+
+	// x, y := 1, 2
+	// x, y = swap(x, y)
+	// fmt.Println(x, y)
+
+	// x1, y1 := "John", "Jane"
+	// x1, y1 = swap(x1, y1)
+	// fmt.Println(x1, y1)
+
+	intStack := Stack[int]{}
+	intStack.push(1)
+	intStack.push(2)
+	intStack.push(3)
+	intStack.printAll()
+	fmt.Println(intStack.pop())
+	intStack.printAll()
+	fmt.Println(intStack.pop())
+	fmt.Println("Is stack empty:", intStack.isEmpty())
+	fmt.Println(intStack.pop())
+	fmt.Println("Is stack empty:", intStack.isEmpty())
+
+	stringStack := Stack[string]{}
+	stringStack.push("Hello")
+	stringStack.push("World")
+	stringStack.push("John")
+	stringStack.printAll()
+	fmt.Println(stringStack.pop())
+	fmt.Println("Is stringStack empty:", stringStack.isEmpty())
+	stringStack.printAll()
+	fmt.Println(stringStack.pop())
+	fmt.Println(stringStack.pop())
+	fmt.Println("Is stringStack empty:", stringStack.isEmpty())
+
+}
+
+// Key Takeaways
+
+/*
+The use of generics ([T any]) allows the Stack type to work with any data type while maintaining type safety.
+The methods are implemented in a way that respects the stack's Last-In-First-Out (LIFO) behavior.
+The code is a good example of how generics can simplify the creation of reusable and type-safe data structures in Go.
+*/

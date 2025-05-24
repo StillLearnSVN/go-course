@@ -1,10 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 )
 
 type user struct {
@@ -21,28 +21,6 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 func teachersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		// teachers/{id} -- Path parameter
-		// /teachers/?key=value&query=value2&sortby=email&sortorder=ASC -- Query parameter
-		
-		// This is how we can get the path from the request
-		fmt.Println(r.URL.Path)
-		path := strings.TrimPrefix(r.URL.Path, "/teachers/")
-		userID := strings.TrimSuffix(path, "/")
-		fmt.Println("User ID:", userID)
-
-		// This is how we can get the query parameters from the request
-		fmt.Println("Query Params", r.URL.Query())
-		queryParams := r.URL.Query()
-		sortby := queryParams.Get("sortby")
-		sortorder := queryParams.Get("sortorder")
-		key := queryParams.Get("key")
-
-		if sortorder == "" {
-			sortorder = "DESC"
-		}
-
-		fmt.Printf("Sort by: %v, Sort order: %v, Key: %v\n", sortby, sortorder, key)
-
 		w.Write([]byte("Hello GET method on teachers route!"))
 		// fmt.Println("Hello GET method  on teachers route!")
 	case http.MethodPost:
@@ -62,9 +40,6 @@ func teachersHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Hello PATCH method on teachers route!")
 		return
 	}
-
-	// w.Write([]byte("Hello teachers route!"))
-	// fmt.Println("Hello teachers route!")
 }
 
 func studentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -89,9 +64,6 @@ func studentsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Hello PATCH method on students route!")
 		return
 	}
-
-	w.Write([]byte("Hello students route!"))
-	fmt.Println("Hello students route!")
 }
 
 func execsHandler(w http.ResponseWriter, r *http.Request) {
@@ -117,27 +89,44 @@ func execsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Hello PATCH method on execs route!")
 		return
 	}
-
-	w.Write([]byte("Hello execs route!"))
-	fmt.Println("Hello execs route!")
 }
 
 func main() {
 
 	port := ":3000"
 
-	http.HandleFunc("/", rootHandler)
+	cert := "cert.pem"
+	key := "key.pem"
 
-	http.HandleFunc("/teachers/", teachersHandler)
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/students/", studentsHandler)
+	mux.HandleFunc("/", rootHandler)
 
-	http.HandleFunc("/execs/", execsHandler)
+	mux.HandleFunc("/teachers/", teachersHandler)
 
-	fmt.Println("Server is running on port:", port)
+	mux.HandleFunc("/students/", studentsHandler)
 
-	err := http.ListenAndServe(port, nil)
+	mux.HandleFunc("/execs/", execsHandler)
+
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+
+	// Create a custom server with TLS configuration
+	server := &http.Server{
+		Addr:      port,
+		Handler:   mux, // Use default handler
+		TLSConfig: tlsConfig,
+	}
+
+	fmt.Println("Server is running on port: ", port)
+
+	err := server.ListenAndServeTLS(cert, key)
 	if err != nil {
 		log.Fatalln("Error starting server:", err)
 	}
 }
+
+// it's fine to use  HTTP handle func for simpler APIs
+// using a mux provides better organization and flexibility as the API grows
+// using a mux make the code more readable and maintainable

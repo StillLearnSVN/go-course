@@ -17,9 +17,6 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Cross-Origin-Resource-Policy", "same-origin") // Restricts the resources to be loaded only from the same origin, enhancing security by preventing cross-origin resource sharing (CORS) vulnerabilities
 		w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp") // Ensures that the page can only embed resources from the same origin or resources that explicitly allow embedding, enhancing security by preventing cross-origin resource sharing (CORS) vulnerabilities
 		w.Header().Set("Cross-Origin-Opener-Policy", "same-origin") // Ensures that the page can only interact with other pages from the same origin, enhancing security by preventing cross-origin interactions
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization") // Specifies which headers can be used in the actual request, allowing the server to control which headers are allowed in cross-origin requests
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS") // Specifies which HTTP methods are allowed when accessing the resource, allowing the server to control which methods can be used in cross-origin requests
-		w.Header().Set("Access-Control-Allow-Credentials", "true") // Indicates whether the browser should include credentials (cookies, HTTP authentication, and client-side SSL certificates) in cross-origin requests, allowing the server to control whether credentials are allowed in cross-origin requests
 		w.Header().Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()") // Controls which features can be used by the page, enhancing privacy and security by disabling potentially sensitive features like geolocation, microphone, and camera access
 
 		next.ServeHTTP(w, r)

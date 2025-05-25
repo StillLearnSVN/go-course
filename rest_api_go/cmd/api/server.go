@@ -3,9 +3,9 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"restapi/internal/api/middlewares"
 	"log"
 	"net/http"
+	mw "restapi/internal/api/middlewares"
 )
 
 type user struct {
@@ -115,9 +115,9 @@ func main() {
 
 	// Create a custom server with TLS configuration
 	server := &http.Server{
-		Addr:      port,
+		Addr: port,
 		// Handler:   mux, // Use default handler
-		Handler:   middlewares.SecurityHeaders(mux), // Apply security headers middleware
+		Handler:   mw.Cors(mw.SecurityHeaders(mux)), // Apply CORS and security headers middleware
 		TLSConfig: tlsConfig,
 	}
 

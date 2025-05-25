@@ -56,15 +56,6 @@ func execsHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Write([]byte("Hello GET method on execs route!"))
 	case http.MethodPost:
-		fmt.Println("Query parameters:", r.URL.Query())
-		fmt.Println("name:", r.URL.Query().Get("name"))
-
-		// Parse the form data if the request method is POST
-		err := r.ParseForm()
-		if err != nil {
-			return
-		}
-		fmt.Println("Form parameters:", r.Form)
 		w.Write([]byte("Hello POST method on execs route!"))
 	case http.MethodPut:
 		w.Write([]byte("Hello PUT method on execs route!"))
@@ -102,10 +93,10 @@ func main() {
 		CheckQuery:             true,
 		CheckBody:              true,
 		ChecBodyForContentType: "application/x-www-form-urlencoded",
-		Whitelist:              []string{"sortBy", "sortOrder", "name", "age", "class", },
+		Whitelist:              []string{"sortBy", "sortOrder", "name", "age", "class"},
 	}
 
-	secureMux := mw.Hpp(hppOptions)(rl.Middleware(mw.Compression(mw.ResponseTimeMiddleware(mw.Cors(mw.SecurityHeaders(mux)))))) // Apply HPP middleware with options
+	secureMux := mw.Cors(rl.Middleware(mw.ResponseTimeMiddleware(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux)))))) // Apply HPP middleware with options
 
 	// Create a custom server with TLS configuration
 	server := &http.Server{

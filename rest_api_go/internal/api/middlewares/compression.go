@@ -8,7 +8,9 @@ import (
 )
 
 func Compression(next http.Handler) http.Handler {
+	fmt.Println("Compression Middleware..")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Compression Mifdleware being returned..")
 		// Check if the request accepts gzip encoding
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			next.ServeHTTP(w, r) // If not, just call the next handler
@@ -17,7 +19,7 @@ func Compression(next http.Handler) http.Handler {
 		// Set the response header to indicate gzip encoding
 		w.Header().Set("Content-Encoding", "gzip")
 		gz := gzip.NewWriter(w) // Create a new gzip writer
-		defer gz.Close() // Ensure the gzip writer is closed after use
+		defer gz.Close()        // Ensure the gzip writer is closed after use
 
 		// Wrap the original ResponseWriter with our gzipResponseWriter
 		w = &gzipResponseWriter{

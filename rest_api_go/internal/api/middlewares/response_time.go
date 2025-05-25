@@ -7,8 +7,10 @@ import (
 )
 
 func ResponseTimeMiddleware(next http.Handler) http.Handler {
+	fmt.Println("Response Time Middleware...")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Received response in ResponseTime")
+		fmt.Println("Response Time Middleware being returned...")
+		// fmt.Println("Received response in ResponseTime")
 		start := time.Now() // Record the start time of the request
 
 		// Create a custom ResponseWriter to capture the status code

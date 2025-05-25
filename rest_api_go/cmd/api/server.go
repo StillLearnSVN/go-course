@@ -72,7 +72,7 @@ func execsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		w.Write([]byte("Hello GET method on execs route!"))
-		fmt.Println("Hello GET method  on execs route!")
+		fmt.Println("Hello GET method on execs route!")
 	case http.MethodPost:
 		w.Write([]byte("Hello POST method on execs route!"))
 		fmt.Println("Hello POST method on execs route!")
@@ -117,7 +117,7 @@ func main() {
 	server := &http.Server{
 		Addr: port,
 		// Handler:   mux, // Use default handler
-		Handler:   mw.Cors(mw.SecurityHeaders(mux)), // Apply CORS and security headers middleware
+		Handler:   mw.ResponseTimeMiddleware(mw.Cors(mw.SecurityHeaders(mux))), // Apply CORS and security headers middleware
 		TLSConfig: tlsConfig,
 	}
 

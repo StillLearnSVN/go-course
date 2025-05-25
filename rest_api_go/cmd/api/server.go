@@ -117,7 +117,7 @@ func main() {
 	server := &http.Server{
 		Addr: port,
 		// Handler:   mux, // Use default handler
-		Handler:   mw.ResponseTimeMiddleware(mw.Cors(mw.SecurityHeaders(mux))), // Apply CORS and security headers middleware
+		Handler:   mw.Compression(mw.ResponseTimeMiddleware(mw.Cors(mw.SecurityHeaders(mux)))), // Apply CORS and security headers middleware
 		TLSConfig: tlsConfig,
 	}
 

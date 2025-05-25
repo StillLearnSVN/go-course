@@ -14,14 +14,13 @@ func ResponseTimeMiddleware(next http.Handler) http.Handler {
 		// Create a custom ResponseWriter to capture the status code
 		wrappedWriter := &responseTimeWriter{
 			ResponseWriter: w,
-			status:          http.StatusOK, // Default status code
+			status:         http.StatusOK, // Default status code
 		}
 
-		
 		// Calculate the response time
 		duration := time.Since(start)
 		wrappedWriter.Header().Set("X-Response-Time", duration.String()) // Set a custom header to indicate that the response time is being tracked
-		
+
 		next.ServeHTTP(wrappedWriter, r) // Call the next handler in the chain
 		// Log the response time and status code
 		fmt.Println("Method:", r.Method, "URL:", r.URL.Path, "Status Code:", wrappedWriter.status, "Response Time:", duration)
@@ -36,6 +35,6 @@ type responseTimeWriter struct {
 }
 
 func (w *responseTimeWriter) WriteHeader(status int) {
-	w.status = status // Capture the status code
+	w.status = status                    // Capture the status code
 	w.ResponseWriter.WriteHeader(status) // Call the original WriteHeader method
 }

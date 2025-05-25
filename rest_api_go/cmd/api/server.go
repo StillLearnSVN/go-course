@@ -6,14 +6,7 @@ import (
 	"log"
 	"net/http"
 	mw "restapi/internal/api/middlewares"
-	"time"
 )
-
-type user struct {
-	Name string `json:"name"`
-	Age  string `json:"age"`
-	City string `json:"city"`
-}
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello root route!"))
@@ -87,16 +80,18 @@ func main() {
 		MinVersion: tls.VersionTLS12,
 	}
 
-	rl := mw.NewRateLimiter(5, time.Minute) // Create a new rate limiter with a limit of 10 requests per minute
+	// rl := mw.NewRateLimiter(5, time.Minute) // Create a new rate limiter with a limit of 10 requests per minute
 
-	hppOptions := mw.HPPOptions{
-		CheckQuery:             true,
-		CheckBody:              true,
-		ChecBodyForContentType: "application/x-www-form-urlencoded",
-		Whitelist:              []string{"sortBy", "sortOrder", "name", "age", "class"},
-	}
+	// hppOptions := mw.HPPOptions{
+	// 	CheckQuery:             true,
+	// 	CheckBody:              true,
+	// 	ChecBodyForContentType: "application/x-www-form-urlencoded",
+	// 	Whitelist:              []string{"sortBy", "sortOrder", "name", "age", "class"},
+	// }
 
-	secureMux := mw.Cors(rl.Middleware(mw.ResponseTimeMiddleware(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux)))))) // Apply HPP middleware with options
+	// secureMux := mw.Cors(rl.Middleware(mw.ResponseTimeMiddleware(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux)))))) // Apply HPP middleware with options
+	// secureMux := ApplyMiddlewares(mux, mw.Hpp(hppOptions), mw.Compression, mw.SecurityHeaders, mw.ResponseTimeMiddleware, rl.Middleware, mw.Cors)
+	secureMux := mw.SecurityHeaders(mux)
 
 	// Create a custom server with TLS configuration
 	server := &http.Server{
@@ -112,6 +107,16 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error starting server:", err)
 	}
+}
+
+// Middleware is a function that takes an http.Handler and returns an http.Handler
+type Middleware func(http.Handler) http.Handler
+
+func ApplyMiddlewares(handler http.Handler, middlewares ...Middleware) http.Handler {
+	for _, middleware := range middlewares {
+		handler = middleware(handler)
+	}
+	return handler
 }
 
 // it's fine to use  HTTP handle func for simpler APIs

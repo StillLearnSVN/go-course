@@ -23,10 +23,12 @@ func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 		// PUT Method
 		// call update teacher handler
 		updateTeacherHandler(w, r)
+	case http.MethodPatch:
+		// PATCH Method
+		// call patch teacher handler
+		patchTeacherHandler(w, r)
 	case http.MethodDelete:
 		w.Write([]byte("Hello DELETE method on teachers route!"))
-	case http.MethodPatch:
-		w.Write([]byte("Hello PATCH method on teachers route!"))
 	}
 }
 
@@ -266,3 +268,66 @@ func updateTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(updatedTeacher)
 }
+
+// PATCH /teachers/{id}
+// Note: Implementing PATCH is similar to PUT, but it allows partial updates.
+func patchTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/teachers/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid teacher ID", http.StatusBadRequest)
+		return
+	}
+
+	var updates map[string]interface{}
+	err = json.NewDecoder(r.Body).Decode(&updates)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	db, err := sqlconnect.ConnectDb()
+	if err != nil {
+		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	var existingTeacher models.Teacher
+	err = db.QueryRow("SELECT id, first_name, last_name, email, class, subject FROM teachers WHERE id = ?", id).Scan(&existingTeacher.ID, &existingTeacher.FirstName, &existingTeacher.LastName, &existingTeacher.Email, &existingTeacher.Class, &existingTeacher.Subject)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Teacher not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Database query error", http.StatusInternalServerError)
+		return
+	}
+
+	// Apply updates
+	for k, v := range updates {
+		switch strings.ToLower(k) {
+		case "first_name":
+			existingTeacher.FirstName = v.(string)
+		case "last_name":
+			existingTeacher.LastName = v.(string)
+		case "email":
+			existingTeacher.Email = v.(string)
+		case "class":
+			existingTeacher.Class = v.(string)
+		case "subject":
+			existingTeacher.Subject = v.(string)
+		default:
+			http.Error(w, fmt.Sprintf("Invalid field: %s", k), http.StatusBadRequest)
+			return
+		}
+	}
+	_, err = db.Exec("UPDATE teachers SET first_name = ?, last_name = ?, email = ?, class = ?, subject = ? WHERE id = ?",
+		existingTeacher.FirstName, existingTeacher.LastName, existingTeacher.Email, existingTeacher.Class, existingTeacher.Subject, existingTeacher.ID)
+	if err != nil {
+		http.Error(w, "Error updating teacher: "+ err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(existingTeacher)
+}  

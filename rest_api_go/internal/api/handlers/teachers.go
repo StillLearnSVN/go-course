@@ -9,42 +9,7 @@ import (
 	"restapi/internal/repositories/sqlconnect"
 	"strconv"
 	"strings"
-	"sync"
 )
-
-var (
-	teachers = make(map[int]models.Teacher)
-	mutex    = &sync.Mutex{}
-	nextID   = 1
-)
-
-// Initializes the teachers map with some sample data
-func init() {
-	teachers[nextID] = models.Teacher{
-		ID:        nextID,
-		FirstName: "John",
-		LastName:  "Doe",
-		Class:     "9A",
-		Subject:   "Algebra",
-	}
-	nextID++
-	teachers[nextID] = models.Teacher{
-		ID:        nextID,
-		FirstName: "Jane",
-		LastName:  "Smith",
-		Class:     "10A",
-		Subject:   "Biology",
-	}
-	nextID++
-	teachers[nextID] = models.Teacher{
-		ID:        nextID,
-		FirstName: "Jane",
-		LastName:  "Doe",
-		Class:     "11A",
-		Subject:   "Computer Programming",
-	}
-	nextID++
-}
 
 func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -55,7 +20,9 @@ func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 		// call add teacher handler
 		addTeacherHandler(w, r)
 	case http.MethodPut:
-		w.Write([]byte("Hello PUT method on teachers route!"))
+		// PUT Method
+		// call update teacher handler
+		updateTeacherHandler(w, r)
 	case http.MethodDelete:
 		w.Write([]byte("Hello DELETE method on teachers route!"))
 	case http.MethodPatch:
@@ -253,4 +220,49 @@ func addTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(response)
+}
+
+// PUT  /teachers/{id}
+func updateTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/teachers/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid teacher ID", http.StatusBadRequest)
+		return
+	}
+
+	var updatedTeacher models.Teacher
+	err = json.NewDecoder(r.Body).Decode(&updatedTeacher)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	db, err := sqlconnect.ConnectDb()
+	if err != nil {
+		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	var existingTeacher models.Teacher
+	err = db.QueryRow("SELECT id, first_name, last_name, email, class, subject FROM teachers WHERE id = ?", id).Scan(&existingTeacher.ID, &existingTeacher.FirstName, &existingTeacher.LastName, &existingTeacher.Email, &existingTeacher.Class, &existingTeacher.Subject)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Teacher not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Database query error", http.StatusInternalServerError)
+		return
+	}
+
+	updatedTeacher.ID = existingTeacher.ID
+	_, err = db.Exec("UPDATE teachers SET first_name = ?, last_name = ?, email = ?, class = ?, subject = ? WHERE id = ?",
+		updatedTeacher.FirstName, updatedTeacher.LastName, updatedTeacher.Email, updatedTeacher.Class, updatedTeacher.Subject, updatedTeacher.ID)
+	if err != nil {
+		http.Error(w, "Error updating teacher: "+ err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedTeacher)
 }

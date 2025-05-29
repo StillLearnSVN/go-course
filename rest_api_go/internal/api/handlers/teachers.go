@@ -63,6 +63,20 @@ func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func isValidSortOrder(order string) bool {
+	return order == "asc" || order == "desc"
+}
+
+func isValidSortField(field string) bool {
+	validFields := []string{"id", "first_name", "last_name", "email", "class", "subject"}
+	for _, validField := range validFields {
+		if field == validField {
+			return true
+		}
+	}
+	return false
+}
+
 func getTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 	db, err := sqlconnect.ConnectDb()
@@ -85,6 +99,11 @@ func getTeacherHandler(w http.ResponseWriter, r *http.Request) {
 		var args []interface{}
 
 		query, args = addFilters(r, query, args)
+
+		query, shouldReturn := addSorting(r, query, w)
+		if shouldReturn {
+			return
+		}
 
 		rows, err := db.Query(query, args...)
 		if err != nil {
@@ -137,6 +156,29 @@ func getTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(teacher)
+}
+
+func addSorting(r *http.Request, query string, w http.ResponseWriter) (string, bool) {
+	sortParams := r.URL.Query()["sortby"]
+	if len(sortParams) > 0 {
+		query += " ORDER BY"
+		for i, param := range sortParams {
+			parts := strings.Split(param, ":")
+			if len(parts) != 2 {
+				continue
+			}
+			field, order := parts[0], parts[1]
+			if !isValidSortField(field) || !isValidSortOrder(order) {
+				http.Error(w, "Invalid sort field or order", http.StatusBadRequest)
+				return "", true
+			}
+			if i > 0 {
+				query += ","
+			}
+			query += " " + field + " " + order
+		}
+	}
+	return query, false
 }
 
 func addFilters(r *http.Request, query string, args []interface{}) (string, []interface{}) {

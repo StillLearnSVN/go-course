@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"restapi/internal/models"
 	"restapi/internal/repositories/sqlconnect"
 	"strconv"
@@ -305,23 +306,41 @@ func patchTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Apply updates
+	// for k, v := range updates {
+	// 	switch strings.ToLower(k) {
+	// 	case "first_name":
+	// 		existingTeacher.FirstName = v.(string)
+	// 	case "last_name":
+	// 		existingTeacher.LastName = v.(string)
+	// 	case "email":
+	// 		existingTeacher.Email = v.(string)
+	// 	case "class":
+	// 		existingTeacher.Class = v.(string)
+	// 	case "subject":
+	// 		existingTeacher.Subject = v.(string)
+	// 	default:
+	// 		http.Error(w, fmt.Sprintf("Invalid field: %s", k), http.StatusBadRequest)
+	// 		return
+	// 	}
+	// }
+
+	// Apply updates using reflect
+	teacherVal := reflect.ValueOf(&existingTeacher).Elem()
+	teacherType := teacherVal.Type()
+
 	for k, v := range updates {
-		switch strings.ToLower(k) {
-		case "first_name":
-			existingTeacher.FirstName = v.(string)
-		case "last_name":
-			existingTeacher.LastName = v.(string)
-		case "email":
-			existingTeacher.Email = v.(string)
-		case "class":
-			existingTeacher.Class = v.(string)
-		case "subject":
-			existingTeacher.Subject = v.(string)
-		default:
-			http.Error(w, fmt.Sprintf("Invalid field: %s", k), http.StatusBadRequest)
-			return
+		for i := 0; i < teacherVal.NumField(); i++ {
+			field := teacherType.Field(i)
+			field.Tag.Get("json")
+			if field.Tag.Get("json") == k+",omitempty" {
+				if teacherVal.Field(i).CanSet() {
+					fieldVal := teacherVal.Field(i) 
+					fieldVal.Set(reflect.ValueOf(v).Convert(fieldVal.Type()))
+				}
+			}
 		}
 	}
+
 	_, err = db.Exec("UPDATE teachers SET first_name = ?, last_name = ?, email = ?, class = ?, subject = ? WHERE id = ?",
 		existingTeacher.FirstName, existingTeacher.LastName, existingTeacher.Email, existingTeacher.Class, existingTeacher.Subject, existingTeacher.ID)
 	if err != nil {

@@ -78,19 +78,14 @@ func getTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(idStr)
 
 	if idStr == "" {
-		firstName := r.URL.Query().Get("first_name")
-		lastName := r.URL.Query().Get("last_name")
-
 		query := "SELECT id, first_name, last_name, email, class, subject FROM teachers WHERE 1=1"
+		// 1=1 is a common trick to simplify appending conditions
+		// 1=1 common practice for making dynamic query building more straightforward, it avoids the need more complex conditional logic
+		// when appending multiple filters.
 		var args []interface{}
-		if firstName != "" {
-			query += " AND first_name = ?"
-			args = append(args, firstName)
-		}
-		if lastName != "" {
-			query += " AND last_name = ?"
-			args = append(args, lastName)
-		}
+
+		query, args = addFilters(r, query, args)
+
 		rows, err := db.Query(query, args...)
 		if err != nil {
 			http.Error(w, "Database query error", http.StatusInternalServerError)
@@ -110,8 +105,8 @@ func getTeacherHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response := struct {
-			Status string    `json:"status"`
-			Count  int       `json:"count"`
+			Status string           `json:"status"`
+			Count  int              `json:"count"`
 			Data   []models.Teacher `json:"data"`
 		}{
 			Status: "success",
@@ -144,6 +139,25 @@ func getTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(teacher)
 }
 
+func addFilters(r *http.Request, query string, args []interface{}) (string, []interface{}) {
+	params := map[string]string{
+		"first_name": "first_name",
+		"last_name":  "last_name",
+		"email":      "email",
+		"class":      "class",
+		"subject":    "subject",
+	}
+
+	for param, dbField := range params {
+		value := r.URL.Query().Get(param)
+		if value != "" {
+			query += " AND " + dbField + " = ?"
+			args = append(args, value)
+		}
+	}
+	return query, args
+}
+
 func addTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 	db, err := sqlconnect.ConnectDb()
@@ -153,7 +167,7 @@ func addTeacherHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
-	
+
 	var newTeachers []models.Teacher
 	err = json.NewDecoder(r.Body).Decode(&newTeachers)
 	if err != nil {
@@ -181,14 +195,14 @@ func addTeacherHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		newTeacher.ID = int(lastID)
 		addedTeachers[i] = newTeacher
-		
+
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	response := struct {
-		Status string    `json:"status"`
-		Count  int       `json:"count"`
+		Status string           `json:"status"`
+		Count  int              `json:"count"`
 		Data   []models.Teacher `json:"data"`
 	}{
 		Status: "success",

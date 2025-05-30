@@ -285,7 +285,7 @@ func PatchTeachersHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err:= strconv.Atoi(idStr)
+		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			tx.Rollback()
 			http.Error(w, "Error converting ID to int", http.StatusBadRequest)
@@ -412,7 +412,7 @@ func PatchOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 // DELETE /teachers/{id}
 // Note: Implementing DELETE is not shown here, but it would typically involve a simple DELETE SQL statement.
-func DeleteTeacherHandler(w http.ResponseWriter, r *http.Request) {
+func DeleteOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -453,6 +453,84 @@ func DeleteTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Status: "success",
 		ID:     id,
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
+func DeleteTeachersHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sqlconnect.ConnectDb()
+	if err != nil {
+		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	var ids []int
+	err = json.NewDecoder(r.Body).Decode(&ids)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		http.Error(w, "Database transaction error", http.StatusInternalServerError)
+		return
+	}
+
+	stmt, err := tx.Prepare("DELETE FROM teachers WHERE id = ?")
+	if err != nil {
+		tx.Rollback()
+		http.Error(w, "Database prepare statement error", http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	deletedIds := []int{}
+	for _, id := range ids {
+		res, err := stmt.Exec(id)
+		if err != nil {
+			tx.Rollback()
+			http.Error(w, "Error deleting teacher with ID "+strconv.Itoa(id)+": "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			tx.Rollback()
+			http.Error(w, "Error getting rows affected for ID "+strconv.Itoa(id)+": "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		//if teacher was deleted then add the ID to the deletedIds slice
+		if rowsAffected > 0 {
+			deletedIds = append(deletedIds, id)
+		} 
+		if rowsAffected < 1 {
+			tx.Rollback()
+			http.Error(w, "Teacher with ID "+strconv.Itoa(id)+" not found", http.StatusNotFound)
+			return
+		}
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		http.Error(w, "Error committing transaction: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(deletedIds) < 1 {
+		http.Error(w, "No IDs provided for deletion", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	response := struct {
+		Status     string `json:"status"`
+		DeletedIds []int  `json:"deleted_ids"`
+	}{
+		Status:     "success",
+		DeletedIds: deletedIds,
 	}
 	json.NewEncoder(w).Encode(response)
 }

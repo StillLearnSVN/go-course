@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"restapi/internal/models"
@@ -15,6 +14,7 @@ func GetTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	var teachers []models.Teacher
 	teachers, err := sqlconnect.GetTeachersDbHandler(teachers, r)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -38,13 +38,13 @@ func GetOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, "Invalid ID", http.StatusInternalServerError)
 		return
 	}
 
 	teacher, err := sqlconnect.GetTeacherByID(id)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -56,13 +56,13 @@ func AddTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	var newTeachers []models.Teacher
 	err := json.NewDecoder(r.Body).Decode(&newTeachers)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
 		return
 	}
 
 	addedTeachers, err := sqlconnect.AddTeachersDBHandler(newTeachers)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -86,6 +86,7 @@ func UpdateTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Invalid teacher ID", http.StatusBadRequest)
 		return
 	}
@@ -99,7 +100,7 @@ func UpdateTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 	updatedTeacherFromDB, err := sqlconnect.UpdateTeacher(id, updatedTeacher)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -114,6 +115,7 @@ func PatchTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	var updates []map[string]interface{}
 	err := json.NewDecoder(r.Body).Decode(&updates)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -121,6 +123,7 @@ func PatchTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	err = sqlconnect.PatchTeachers(updates)
 	if err != nil {
 		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent) // 204 No Content
@@ -132,6 +135,7 @@ func PatchOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Invalid teacher ID", http.StatusBadRequest)
 		return
 	}
@@ -145,6 +149,7 @@ func PatchOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 	updatedTeacher, err := sqlconnect.PatchOneTeacher(id, updates)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -157,18 +162,16 @@ func DeleteOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Invalid teacher ID", http.StatusBadRequest)
 		return
 	}
 
 	err = sqlconnect.DeleteOneTeacher(id)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// --- Alternatively, you can return a 204 No Content status code ---
-	// w.WriteHeader(http.StatusNoContent) // 204 No Content
 
 	w.Header().Set("Content-Type", "application/json")
 	response := struct {
@@ -186,13 +189,14 @@ func DeleteTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	var ids []int
 	err := json.NewDecoder(r.Body).Decode(&ids)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	deletedIds, err := sqlconnect.DeleteTeachers(ids)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -127,14 +127,17 @@ func AddTeachersDBHandler(newTeachers []models.Teacher) ([]models.Teacher, error
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("INSERT INTO teachers (first_name, last_name, email, class, subject) VALUES (?, ?, ?, ?, ?)")
+	// stmt, err := db.Prepare("INSERT INTO teachers (first_name, last_name, email, class, subject) VALUES (?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare(generateInsertQuery(models.Teacher{}))
 	if err != nil {
 		return nil, utils.ErrorHandler(err, "Error adding data")
 	}
 	defer stmt.Close()
 	addedTeachers := make([]models.Teacher, len(newTeachers))
 	for i, newTeacher := range newTeachers {
-		res, err := stmt.Exec(newTeacher.FirstName, newTeacher.LastName, newTeacher.Email, newTeacher.Class, newTeacher.Subject)
+		// res, err := stmt.Exec(newTeacher.FirstName, newTeacher.LastName, newTeacher.Email, newTeacher.Class, newTeacher.Subject)
+		values := getStructValues(newTeacher)
+		res, err := stmt.Exec(values...)
 		if err != nil {
 			return nil, utils.ErrorHandler(err, "Error adding data")
 		}
@@ -147,6 +150,40 @@ func AddTeachersDBHandler(newTeachers []models.Teacher) ([]models.Teacher, error
 
 	}
 	return addedTeachers, nil
+}
+
+func generateInsertQuery(model interface{}) string {
+	modelType := reflect.TypeOf(model)
+	var columns, placeholders string
+	for i := 0; i < modelType.NumField(); i++ {
+		dbTag := modelType.Field(i).Tag.Get("db")
+		fmt.Println("DB Tag:", dbTag)
+		dbTag = strings.TrimSuffix(dbTag, ",omitempty")
+		if dbTag != "" && dbTag != "id" { // Exclude ID field from insert
+			if columns != "" {
+				columns += ", "
+				placeholders += ", "
+			}
+			columns += dbTag
+			placeholders += "?"
+		}
+	}
+	fmt.Printf("INSERT INTO teachers (%s) VALUES (%s)\n", columns, placeholders)
+	return fmt.Sprintf("INSERT INTO teachers (%s) VALUES (%s)", columns, placeholders)
+}
+
+func getStructValues(model interface{}) []interface{} {
+	modelValue := reflect.ValueOf(model)
+	modelType := modelValue.Type()
+	values := []interface{}{}
+	for i := 0; i < modelType.NumField(); i++ {
+		dbTag := modelType.Field(i).Tag.Get("db")
+		if dbTag != "" && dbTag != "id,omitempty" { // Exclude ID field from insert
+			values = append(values, modelValue.Field(i).Interface())
+		}
+	}
+	log.Println("Values to insert:", values)
+	return values
 }
 
 func UpdateTeacher(id int, updatedTeacher models.Teacher) (models.Teacher, error) {
@@ -265,7 +302,7 @@ func PatchOneTeacher(id int, updates map[string]interface{}) (models.Teacher, er
 		if err == sql.ErrNoRows {
 			return models.Teacher{}, utils.ErrorHandler(err, "Teacher not found")
 		}
-		return models.Teacher{}, utils.ErrorHandler(err, "Error updating data")	
+		return models.Teacher{}, utils.ErrorHandler(err, "Error updating data")
 	}
 
 	teacherVal := reflect.ValueOf(&existingTeacher).Elem()

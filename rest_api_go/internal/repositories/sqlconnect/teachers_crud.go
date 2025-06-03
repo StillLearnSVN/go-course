@@ -242,18 +242,18 @@ func PatchOneTeacher(id int, updates map[string]interface{}) (models.Teacher, er
 func DeleteOneTeacher(id int) error {
 	db, err := ConnectDb()
 	if err != nil {
-		return utils.ErrorHandler(err, "Error updating data")
+		return utils.ErrorHandler(err, "Error deleting data")
 	}
 	defer db.Close()
 
 	result, err := db.Exec("DELETE FROM teachers WHERE id = ?", id)
 	if err != nil {
-		return utils.ErrorHandler(err, "Error updating data")
+		return utils.ErrorHandler(err, "Error deleting data")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return utils.ErrorHandler(err, "Error updating data")
+		return utils.ErrorHandler(err, "Error deleting data")
 	}
 
 	if rowsAffected == 0 {
@@ -265,19 +265,19 @@ func DeleteOneTeacher(id int) error {
 func DeleteTeachers(ids []int) ([]int, error) {
 	db, err := ConnectDb()
 	if err != nil {
-		return nil, utils.ErrorHandler(err, "Error updating data")
+		return nil, utils.ErrorHandler(err, "Error deleting data")
 	}
 	defer db.Close()
 
 	tx, err := db.Begin()
 	if err != nil {
-		return nil, utils.ErrorHandler(err, "Error updating data")
+		return nil, utils.ErrorHandler(err, "Error deleting data")
 	}
 
 	stmt, err := tx.Prepare("DELETE FROM teachers WHERE id = ?")
 	if err != nil {
 		tx.Rollback()
-		return nil, utils.ErrorHandler(err, "Error updating data")
+		return nil, utils.ErrorHandler(err, "Error deleting data")
 	}
 	defer stmt.Close()
 
@@ -286,12 +286,12 @@ func DeleteTeachers(ids []int) ([]int, error) {
 		res, err := stmt.Exec(id)
 		if err != nil {
 			tx.Rollback()
-			return nil, utils.ErrorHandler(err, "Error updating data")
+			return nil, utils.ErrorHandler(err, "Error deleting data")
 		}
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
 			tx.Rollback()
-			return nil, utils.ErrorHandler(err, "Error updating data")
+			return nil, utils.ErrorHandler(err, "Error deleting data")
 		}
 
 		//if teacher was deleted then add the ID to the deletedIds slice
@@ -307,11 +307,39 @@ func DeleteTeachers(ids []int) ([]int, error) {
 	// Commit the transaction
 	err = tx.Commit()
 	if err != nil {
-		return nil, utils.ErrorHandler(err, "Error updating data")
+		return nil, utils.ErrorHandler(err, "Error deleting data")
 	}
 
 	if len(deletedIds) < 1 {
 		return nil, utils.ErrorHandler(err, "IDs do not exist")
 	}
 	return deletedIds, nil
+}
+
+func GetStudentsByTeacherIdFromDb(teacherId string, w http.ResponseWriter, students []models.Student) ([]models.Student, error) {
+	db, err := ConnectDb()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "Error retrieving data")
+	}
+
+	query := `SELECT id, first_name, last_name, email, class FROM students WHERE class = (SELECT class FROM teachers WHERE id = ?)`
+	rows, err := db.Query(query, teacherId)
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "Error retrieving data")
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var student models.Student
+		err := rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Email, &student.Class)
+		if err != nil {
+			return nil, utils.ErrorHandler(err, "Error retrieving data")
+
+		}
+		students = append(students, student)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "Error retrieving data")
+	}
+	return students, nil
 }

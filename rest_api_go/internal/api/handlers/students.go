@@ -231,7 +231,7 @@ func DeleteStudentsHandler(w http.ResponseWriter, r *http.Request) {
 		Status     string `json:"status"`
 		DeletedIds []int  `json:"deleted_ids"`
 	}{
-		Status:     "success",
+		Status:     "Students deleted successfully",
 		DeletedIds: deletedIds,
 	}
 	json.NewEncoder(w).Encode(response)

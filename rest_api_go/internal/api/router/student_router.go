@@ -5,14 +5,13 @@ import (
 	"restapi/internal/api/handlers"
 )
 
-func StudentRouter() *http.ServeMux {
-	mux := http.NewServeMux()
+func studentsRouter() *http.ServeMux {
 
-	// --- Students routes
-	mux.HandleFunc("GET /students/", handlers.GetStudentsHandler)
-	mux.HandleFunc("POST /students/", handlers.AddStudentHandler)
-	mux.HandleFunc("PATCH /students/", handlers.PatchStudentsHandler)
-	mux.HandleFunc("DELETE /students/", handlers.DeleteStudentsHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /students", handlers.GetStudentsHandler)
+	mux.HandleFunc("POST /students", handlers.AddStudentHandler)
+	mux.HandleFunc("PATCH /students", handlers.PatchStudentsHandler)
+	mux.HandleFunc("DELETE /students", handlers.DeleteStudentsHandler)
 
 	mux.HandleFunc("GET /students/{id}", handlers.GetOneStudentHandler)
 	mux.HandleFunc("PUT /students/{id}", handlers.UpdateStudentHandler)

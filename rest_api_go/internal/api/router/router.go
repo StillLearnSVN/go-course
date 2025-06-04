@@ -6,8 +6,8 @@ import (
 
 func MainRouter() *http.ServeMux {
 
-	tRouter := TeacherRouter()
-	sRouter := StudentRouter()
+	tRouter := teachersRouter()
+	sRouter := studentsRouter()
 
 	sRouter.Handle("/", ExecsRouter())
 	tRouter.Handle("/", sRouter)

@@ -12,7 +12,6 @@ func CheckBlankFields(value interface{}) error {
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Field(i)
 		if field.Kind() == reflect.String && field.String() == "" {
-			// http.Error(w, "All fields must be filled", http.StatusBadRequest)
 			return utils.ErrorHandler(errors.New("all fields are required"), "All fields are required")
 		}
 	}

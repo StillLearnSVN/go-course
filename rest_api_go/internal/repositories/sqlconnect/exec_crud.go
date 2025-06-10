@@ -88,9 +88,9 @@ func AddExecsDBHandler(newExecs []models.Exec) ([]models.Exec, error) {
 			return nil, utils.ErrorHandler(errors.New("failed to generate salt"), "error adding data")
 		}
 
-		argon2.IDKey([]byte(newExec.Password), salt, 1, 64*1024, 4, 32)
+		hash := argon2.IDKey([]byte(newExec.Password), salt, 1, 64*1024, 4, 32)
 		saltBase64 := base64.StdEncoding.EncodeToString(salt)
-		hashBase64 := base64.StdEncoding.EncodeToString(salt)
+		hashBase64 := base64.StdEncoding.EncodeToString(hash)
 
 		encodedHash := fmt.Sprintf("%s.%s", saltBase64, hashBase64)
 

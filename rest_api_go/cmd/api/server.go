@@ -9,6 +9,7 @@ import (
 	mw "restapi/internal/api/middlewares"
 	"restapi/internal/api/router"
 	"restapi/internal/repositories/sqlconnect"
+	"restapi/pkg/utils"
 
 	"github.com/joho/godotenv"
 )
@@ -23,7 +24,8 @@ func main() {
 
 	_, err = sqlconnect.ConnectDb() // Connect to the database
 	if err != nil {
-		log.Fatalln("Error connecting to database:", err)
+		utils.ErrorHandler(err, "")
+		return
 	}
 	
 	port := os.Getenv("API_PORT")

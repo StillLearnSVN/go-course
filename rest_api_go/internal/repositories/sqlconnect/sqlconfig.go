@@ -16,7 +16,6 @@ func ConnectDb() (*sql.DB, error) {
 	dbhost := os.Getenv("DB_HOST")
 	dbport := os.Getenv("DB_PORT")
 	
-	fmt.Println("Connecting to database:", dbname)
 	// connectionString := "root:Mypass123@tcp(localhost:3306)/" + dbname
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, dbhost, dbport, dbname)
 	db, err := sql.Open("mysql", connectionString)
@@ -26,6 +25,5 @@ func ConnectDb() (*sql.DB, error) {
 		return nil, err
 	}
 
-	fmt.Println("Connected to database:", dbname)
 	return db, nil
 }

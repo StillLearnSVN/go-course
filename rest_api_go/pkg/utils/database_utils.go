@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"log"
+	// "log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -13,7 +13,7 @@ func GenerateInsertQuery(tableName string, model interface{}) string {
 	var columns, placeholders string
 	for i := 0; i < modelType.NumField(); i++ {
 		dbTag := modelType.Field(i).Tag.Get("db")
-		fmt.Println("DB Tag:", dbTag)
+		// fmt.Println("DB Tag:", dbTag)
 		dbTag = strings.TrimSuffix(dbTag, ",omitempty")
 		if dbTag != "" && dbTag != "id" { // Exclude ID field from insert
 			if columns != "" {
@@ -37,7 +37,7 @@ func GetStructValues(model interface{}) []interface{} {
 			values = append(values, modelValue.Field(i).Interface())
 		}
 	}
-	log.Println("Values to insert:", values)
+	// log.Println("Values to insert:", values)
 	return values
 }
 

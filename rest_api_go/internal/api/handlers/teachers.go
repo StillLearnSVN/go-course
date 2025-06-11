@@ -279,7 +279,7 @@ func GetStudentCountByTeacherId(w http.ResponseWriter, r *http.Request) {
 	teacherId := r.PathValue("id")
 
 	var studentCount int
-	
+
 	studentCount, err := sqlconnect.GetStudentCountByTeacherIdFromDb(teacherId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

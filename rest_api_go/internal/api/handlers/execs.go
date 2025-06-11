@@ -1,11 +1,7 @@
 package handlers
 
 import (
-	"crypto/subtle"
-	"database/sql"
-	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -13,10 +9,7 @@ import (
 	"restapi/internal/repositories/sqlconnect"
 	"restapi/pkg/utils"
 	"strconv"
-	"strings"
 	"time"
-
-	"golang.org/x/crypto/argon2"
 )
 
 func GetExecsHandler(w http.ResponseWriter, r *http.Request) {
@@ -211,27 +204,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Search for user if user actually exists
-	db, err := sqlconnect.ConnectDb()
+	user, err := sqlconnect.GetUserByUsername(req.Username)
 	if err != nil {
-		utils.ErrorHandler(err, "error updating data")
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		http.Error(w, "Invalid username or password", http.StatusBadRequest)
 		return
 	}
-	defer db.Close()
 
-	user := &models.Exec{}
-
-	err = db.QueryRow("SELECT id, first_name, last_name, email, username, password, inactive_status, role FROM execs WHERE username = ?", req.Username).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Username, &user.Password, &user.InactiveStatus, &user.Role)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			utils.ErrorHandler(err, "user not found")
-			http.Error(w, "User not found", http.StatusBadRequest)
-			return
-		}
-		http.Error(w, "database query error", http.StatusBadRequest)
-		return
-	}
 	// is user active?
 	if user.InactiveStatus {
 		http.Error(w, "User is inactive", http.StatusForbidden)
@@ -239,45 +217,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// verify password
-	parts := strings.Split(user.Password, ".")
-	if len(parts) != 2 {
-		utils.ErrorHandler(errors.New("invalid encoded hash format"), "invalid password format")
-		http.Error(w, "Invalid encoded hash format", http.StatusInternalServerError)
-		return
-	}
-
-	saltBase64 := parts[0]
-	hashedPasswordBase64 := parts[1]
-
-	salt, err := base64.StdEncoding.DecodeString(saltBase64)
-
+	err = utils.VerifyPassword(req.Password, user.Password)
 	if err != nil {
-		utils.ErrorHandler(err, "error decoding salt")
-		http.Error(w, "Error decoding salt", http.StatusInternalServerError)
-		return
-	}
-
-	hashedPassword, err := base64.StdEncoding.DecodeString(hashedPasswordBase64)
-
-	if err != nil {
-		utils.ErrorHandler(err, "failed to decode hashed password")
-		http.Error(w, "Error decoding hashed password", http.StatusInternalServerError)
-		return
-	}
-
-	hash := argon2.IDKey([]byte(req.Password), salt, 1, 64*1024, 4, 32)
-
-	if len(hash) != len(hashedPassword) {
-		utils.ErrorHandler(errors.New("incorrect password"), "incorrect password")
-		http.Error(w, "Incorrect password", http.StatusUnauthorized)
-		return
-	}
-
-	if subtle.ConstantTimeCompare(hash, hashedPassword) == 1 {
-		// do nothing
-	} else {
-		utils.ErrorHandler(errors.New("incorrect password"), "incorrect password")
-		http.Error(w, "Incorrect password", http.StatusUnauthorized)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -295,6 +237,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true,
 		Expires:  time.Now().Add(24 * time.Hour), // Token valid for 24 hours
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	http.SetCookie(w, &http.Cookie{
@@ -304,6 +247,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true,
 		Expires:  time.Now().Add(24 * time.Hour), // Token valid for 24 hours
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	// Response body
@@ -314,4 +258,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Token: tokenString,
 	}
 	json.NewEncoder(w).Encode(response)
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "Bearer",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		Expires:  time.Unix(0, 0), // Expire the cookie immediately
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"message": "Logged out successfully"}`))
+
 }

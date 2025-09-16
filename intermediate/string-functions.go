@@ -1,0 +1,86 @@
+package main
+
+import (
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+	"unicode/utf8"
+)
+
+func main() {
+	str := "Hello, 世界!" // 世界 means "world" in Chinese
+
+	fmt.Println(len(str))         // Length in bytes
+	fmt.Println([]rune(str))      // Convert to runes to get characters
+	fmt.Println(len([]rune(str))) // Length in characters
+	fmt.Println("Length in characters using utf8:", utf8.RuneCountInString(str)) // Length in characters using utf8 package
+
+	// String concatenation and slicing
+	var str1 = "Hello"
+	var str2 = "World"
+	combined := str1 + " " + str2
+	fmt.Println(combined)
+	fmt.Println(combined[0:4]) // Slicing, gets "Hell" --> cuz it starts at 0 and goes up to but not including 4
+	fmt.Println(combined[1:5]) // From index 1 to 4, gets "ello"
+
+	// String conversion
+	num := 42
+	str3 := strconv.Itoa(num) // int to string
+	fmt.Println(len(str3))
+
+	// strings splitting and joining
+	csv := "apple,banana,cherry"
+	fruits := strings.Split(csv, ",")
+	fmt.Println(fruits)
+
+	joined := strings.Join(fruits, " & ")
+	fmt.Println(joined)
+
+	// Searching
+	fmt.Println(strings.Contains(csv, "banana")) // true
+	fmt.Println(strings.HasPrefix(csv, "app"))   // true
+	fmt.Println(strings.HasSuffix(csv, "to")) // true
+
+	// Replacing
+	newStr := strings.ReplaceAll(csv, "banana", "blueberry")
+	fmt.Println(newStr)
+
+	// Case conversion
+	fmt.Println(strings.ToUpper(str1)) // "HELLO"
+	fmt.Println(strings.ToLower(str2)) // "world"
+
+	// Trimming
+	strWithSpaces := "   Hello, World!   "
+	fmt.Println(strings.TrimSpace(strWithSpaces)) // "Hello, World!"
+
+	// Repeating
+	repeated := strings.Repeat("Go! ", 3)
+	fmt.Println(repeated) // "Go! Go! Go! "
+
+	// Using Regexp
+	// (omitted for brevity, but you can use the "regexp" package for regex operations)
+	str4 := "The price is $100"
+	re := regexp.MustCompile(`\d+`) // d+ --> means one or more digits
+	matches := re.FindAllString(str4, -1)
+	fmt.Println(matches) // ["100"]
+
+	// String Builder for efficient concatenation of multiple strings
+	// (more efficient than using + operator in loops)
+	var sb strings.Builder
+	sb.WriteString("Hello")
+	sb.WriteString(", ")
+	sb.WriteString("World!")
+	fmt.Println(sb.String()) // "Hello, World!"
+
+	// using WriteRune
+	sb.WriteRune(' ')
+	sb.WriteString("😊") // This will overwrite the previous string, and adding a smiley face at the end.
+	fmt.Println(sb.String()) // "Hello, World! 😊"
+
+	// Resetting the builder
+	sb.Reset()
+	sb.WriteString("New String")
+	fmt.Println(sb.String()) // "New String"
+
+}

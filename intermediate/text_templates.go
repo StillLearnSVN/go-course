@@ -1,0 +1,104 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"html/template"
+	"os"
+	"strings"
+)
+
+func main() {
+	// // tmpl, err := template.New("example").Parse("Hello, {{.name}}!, welcome to {{.place}}.")
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+
+	// // We can also use template.Must to simplify error handling
+	// tmpl := template.Must(template.New("example").Parse("Hello, {{.name}}!, welcome to {{.place}}."))
+
+	// data := map[string]string{
+	// 	"name":  "Alice",
+	// 	"place": "Wonderland",
+	// }
+
+	// err := tmpl.Execute(os.Stdout, data)
+
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+
+	// Accept input from user
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter your name: ")
+	name, _ := reader.ReadString('\n')
+	name = strings.TrimSpace(name)
+
+	fmt.Print("Enter your place: ")
+	place, _ := reader.ReadString('\n')
+
+	// Define named templates for different types of
+	templates := map[string]string{
+		"welcome":  "Hello, {{.name}}!, welcome to {{.place}}.",
+		"farewell": "Goodbye, {{.name}}!, see you again in {{.place}}. Maybe you can bring a friend next time!",
+		"notice":   "Notice: {{.name}}, your appointment in {{.place}} is scheduled for tomorrow.",
+		"error":    "Error: {{.name}} not found in {{.place}}. Please check your details and try again.",
+	}
+
+	// Parse and store templates
+	parsedTemplates := make(map[string]*template.Template)
+	for name, tmplStr := range templates {
+		parsedTemplates[name] = template.Must(template.New(name).Parse(tmplStr))
+	}
+
+	for {
+		// Show menu
+		fmt.Println("\nChoose a template to render:")
+		fmt.Println("1. Welcome")
+		fmt.Println("2. Farewell")
+		fmt.Println("3. Notice")
+		fmt.Println("4. Error")
+		fmt.Println("5. Exit")
+		fmt.Print("Enter choice (1-5): ")
+
+		choice, _ := reader.ReadString('\n')
+		choice = strings.TrimSpace(choice)
+
+		var tmpl *template.Template
+		switch choice {
+		case "1":
+			tmpl = parsedTemplates["welcome"]
+		case "2":
+			tmpl = parsedTemplates["farewell"]
+		case "3":
+			tmpl = parsedTemplates["notice"]
+		case "4":
+			tmpl = parsedTemplates["error"]
+		case "5":
+			fmt.Println("Exiting...")
+			return
+		default:
+			fmt.Println("Invalid choice, please try again.")
+			continue
+		}
+
+		data := map[string]string{
+			"name":  name,
+			"place": strings.TrimSpace(place),
+		}
+
+		err := tmpl.Execute(os.Stdout, data)
+		if err != nil {
+			fmt.Println("Error executing template:", err)
+		}
+		fmt.Println() // For better output formatting
+	}
+
+	// Conclusion for Text Templates
+	/*
+		Text templates in Go provide a powerful way to generate dynamic text content. By defining templates with placeholders, we can easily customize output based on
+		user input or other data sources. The use of named templates allows for better organization and reuse of template definitions. This approach is particularly
+		useful for generating emails, reports, or any text-based content that requires dynamic data insertion.
+	*/
+}

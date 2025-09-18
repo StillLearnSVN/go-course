@@ -1,0 +1,60 @@
+package main
+
+import (
+	"fmt"
+	"regexp"
+)
+
+
+func main() {
+	fmt.Println("She said, \"Hello, World!\"") // Using escape sequences, the backslash (\) allows you to include double quotes inside a string literal.
+	fmt.Println(`She said, "Hello, World!"`) // Using raw string literals, you can include double quotes directly without needing escape sequences.
+
+	// Compile a regex pattern to match email addresses
+	re := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	// Explaination of the regex pattern:
+	// ^ --> asserts the start of the string
+	// [a-zA-Z0-9._%+-]+ --> matches one or more characters that can be letters (both uppercase and lowercase), digits, dots (.), underscores (_), percent signs (%), plus signs (+), or hyphens (-)
+	// @ --> matches the "@" symbol
+	// [a-zA-Z0-9.-]+ -->  matches one or more characters that can be letters (both uppercase and lowercase), digits, dots (.), or hyphens (-)
+	// \. --> matches a literal dot (.)
+	// [a-zA-Z]{2,} --> matches two or more letters (both uppercase and lowercase) for the domain suffix
+	// $ --> asserts the end of the string
+
+	// Test the regex pattern against some email addresses
+	email1 := "user@email.com"
+	email2 := "invalid-email"
+	
+	fmt.Printf("Does '%s' match? %v\n", email1, re.MatchString(email1))
+	fmt.Printf("Does '%s' match? %v\n", email2, re.MatchString(email2))
+
+	// Capturing groups example
+	// Compile a regex pattern to capture the date components
+	dateRe := regexp.MustCompile(`(\d{4})-(\d{2})-(\d{2})`)
+	date := "2023-11-05"
+	matches := dateRe.FindStringSubmatch(date)
+	if len(matches) > 0 {
+		fmt.Printf("Full date: %s, Year: %s, Month: %s, Day: %s\n", matches[0], matches[1], matches[2], matches[3])
+	} else {
+		fmt.Println("No match found for the date.")
+	}
+
+	// Replace example
+	str := "Hello, World! Welcome to the World of Go."
+	reReplace := regexp.MustCompile(`[aiueo]`)
+
+	result := reReplace.ReplaceAllString(str, "*")
+	fmt.Println(result) // H*ll*, W*rld! W*lc*m* t* th* W*rld *f G*.
+
+	// i - case insensitive
+	// m - multi-line mode
+	// s- dot matches newline
+
+	reFlags := regexp.MustCompile(`(?im)hello`)
+	fmt.Println(reFlags.MatchString("Hello")) // true
+	fmt.Println(reFlags.MatchString("hello")) // true
+	fmt.Println(reFlags.MatchString("HELLO")) // true
+	fmt.Println(reFlags.MatchString("HeLLo")) // true
+	fmt.Println(reFlags.MatchString("Hi there")) // false
+
+}

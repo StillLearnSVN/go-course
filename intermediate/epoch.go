@@ -1,0 +1,23 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	// 00:00:00 UTC on January 1, 1970
+
+	now := time.Now()
+	unixTime := now.Unix()
+	fmt.Println("Current Unix Time:", unixTime)
+
+	// Convert back to time.Time
+	convertedTime := time.Unix(unixTime, 0)
+	fmt.Println("Converted Time:", convertedTime)
+	fmt.Println("Date:", convertedTime.Format("2006-01-02"))
+
+	// Conclision:
+	// Unix time is a way to represent time as the number of seconds that have elapsed since the epoch (January 1, 1970).
+	// It is widely used in computing and programming for its simplicity and ease of calculation.
+}

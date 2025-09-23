@@ -82,4 +82,4 @@ func main() {
 }
 
 // How to create a self-signed certificate using openSSL:f
-// openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+// openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -config openssl.cnf

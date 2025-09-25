@@ -1,19 +1,14 @@
 package sqlconnect
 
 import (
-	"crypto/rand"
 	"database/sql"
-	"encoding/base64"
-	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"reflect"
 	"restapi/internal/models"
 	"restapi/pkg/utils"
 	"strconv"
-
-	"golang.org/x/crypto/argon2"
+	"time"
 )
 
 func GetExecsDbHandler(execs []models.Exec, r *http.Request) ([]models.Exec, error) {
@@ -76,25 +71,13 @@ func AddExecsDBHandler(newExecs []models.Exec) ([]models.Exec, error) {
 		return nil, utils.ErrorHandler(err, "error adding data")
 	}
 	defer stmt.Close()
+
 	addedExecs := make([]models.Exec, len(newExecs))
 	for i, newExec := range newExecs {
-		if newExec.Password == "" {
-			return nil, utils.ErrorHandler(errors.New("please is blank"), "please enter a password")
-		}
-		salt := make([]byte, 16)
-		_, err := rand.Read(salt)
-
+		newExec.Password, err = utils.HashPassword(newExec.Password)
 		if err != nil {
-			return nil, utils.ErrorHandler(errors.New("failed to generate salt"), "error adding data")
+			return nil, utils.ErrorHandler(err, "error adding exec into database")
 		}
-
-		hash := argon2.IDKey([]byte(newExec.Password), salt, 1, 64*1024, 4, 32)
-		saltBase64 := base64.StdEncoding.EncodeToString(salt)
-		hashBase64 := base64.StdEncoding.EncodeToString(hash)
-
-		encodedHash := fmt.Sprintf("%s.%s", saltBase64, hashBase64)
-
-		newExec.Password = encodedHash
 
 		values := utils.GetStructValues(newExec)
 		res, err := stmt.Exec(values...)
@@ -263,4 +246,50 @@ func GetUserByUsername(username string) (*models.Exec, error) {
 		return nil, utils.ErrorHandler(err, "database error")
 	}
 	return user, nil
+}
+
+func UpdatePasswordInDb(userId int, currentPassword, newPassword string) (bool, error) {
+	db, err := ConnectDb()
+	if err != nil {
+		return false, utils.ErrorHandler(err, "db connection error")
+	}
+	defer db.Close()
+
+	var (
+		username     string
+		userPassword string
+		userRole     string
+	)
+
+	err = db.QueryRow("SELECT username, password, role FROM execs WHERE id = ?", userId).Scan(&username, &userPassword, &userRole)
+	if err != nil {
+		return false, utils.ErrorHandler(err, "error retrieving user data")
+	}
+
+	// Verify current password
+	err = utils.VerifyPassword(currentPassword, userPassword)
+	if err != nil {
+		return false, utils.ErrorHandler(err, "current password is incorrect")
+	}
+
+	// Hash new password
+	hashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return false, utils.ErrorHandler(err, "error hashing new password")
+	}
+
+	currentTime := time.Now().Format(time.RFC3339)
+
+	_, err = db.Exec("UPDATE execs SET password=?, password_changed_at=? WHERE id=?", hashedPassword, currentTime, userId)
+	if err != nil {
+		return false, utils.ErrorHandler(err, "error updating password in database")
+	}
+
+	// token, err := utils.SignToken(userId, username, userRole)
+	// if err != nil {
+	// 	utils.ErrorHandler(err, "Password updated. could not sign new token")
+	// 	return
+	// }
+
+	return false, nil
 }

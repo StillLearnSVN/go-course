@@ -360,3 +360,42 @@ func ForgotPassswordDbHandler(emailId string) error {
 	}
 	return nil
 }
+
+func ResetPasswordDbHandler(token, newPassword string) error {
+
+		bytes, err := hex.DecodeString(token)
+	if err != nil {
+		return utils.ErrorHandler(err, "Invalid reset token")
+	}
+
+	hashedToken := sha256.Sum256(bytes)
+	hashedTokenString := hex.EncodeToString(hashedToken[:])
+
+	db, err := ConnectDb()
+	if err != nil {
+		utils.ErrorHandler(err, "Failed to connect to database")
+	}
+	defer db.Close()
+
+	var user models.Exec
+
+	query := "SELECT id, email FROM execs WHERE password_reset_token = ? AND password_token_expires > ?"
+	err = db.QueryRow(query, hashedTokenString, time.Now().Format(time.RFC3339)).Scan(&user.ID, &user.Email)
+	if err != nil {
+		return utils.ErrorHandler(err, "Invalid or expired token")
+	}
+
+	// Hash the new password
+	hashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return utils.ErrorHandler(err, "Failed to hash new password")
+	}
+
+	// Update the user's password and clear the reset token fields
+	updateQuery := "UPDATE execs SET password = ?, password_changed_at = ?, password_reset_token = NULL, password_token_expires = NULL WHERE id = ?"
+	_, err = db.Exec(updateQuery, hashedPassword, time.Now().Format(time.RFC3339), user.ID)
+	if err != nil {
+		return utils.ErrorHandler(err, "Failed to update password")
+	}
+	return nil
+}

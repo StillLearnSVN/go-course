@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"restapi/internal/models"
 	"restapi/internal/repositories/sqlconnect"
+	"restapi/pkg/utils"
 	"strconv"
 )
 
 func GetStudentsHandler(w http.ResponseWriter, r *http.Request) {
 	var students []models.Student
 
-	page, limit := getPaginationParams(r)
+	page, limit := utils.GetPaginationParams(r)
 
 	students, totalStudents, err := sqlconnect.GetStudentDbHandler(students, r, limit, page)
 	if err != nil {
@@ -22,37 +23,21 @@ func GetStudentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := struct {
-		Status string           `json:"status"`
-		Count  int              `json:"count"`
-		Page  int              `json:"page"`
+		Status   string           `json:"status"`
+		Count    int              `json:"count"`
+		Page     int              `json:"page"`
 		PageSize int              `json:"page_size"`
-		Data   []models.Student `json:"data"`
+		Data     []models.Student `json:"data"`
 	}{
-		Status: "success",
-		Count:  totalStudents,
-		Page:   page,
-		PageSize:  limit,
-		Data:   students,
+		Status:   "success",
+		Count:    totalStudents,
+		Page:     page,
+		PageSize: limit,
+		Data:     students,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
-}
-
-// Implement pagination on students, like url?limit=10&page=2
-
-func getPaginationParams(r *http.Request) (int, int) {
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil || limit < 1 {
-		limit = 10
-	}
-
-	return page, limit
 }
 
 func GetOneStudentHandler(w http.ResponseWriter, r *http.Request) {

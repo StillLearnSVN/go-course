@@ -11,11 +11,11 @@ import (
 	"strconv"
 )
 
-func GetTeachersDbHandler(teachers []models.Teacher, r *http.Request) ([]models.Teacher, error) {
+func GetTeachersDbHandler(teachers []models.Teacher, r *http.Request, limit, page int) ([]models.Teacher, int, error) {
 	db, err := ConnectDb()
 
 	if err != nil {
-		return nil, utils.ErrorHandler(err, "Error retrieving data")
+		return nil, 0, utils.ErrorHandler(err, "Error retrieving data")
 	}
 	defer db.Close()
 
@@ -23,12 +23,17 @@ func GetTeachersDbHandler(teachers []models.Teacher, r *http.Request) ([]models.
 	var args []interface{}
 
 	query, args = utils.AddFilters(r, query, args)
-
+	
+	// Add Pagination
+	offset := (page - 1) * limit
+	query += " LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+	
 	query = utils.AddSorting(r, query)
 
 	rows, err := db.Query(query, args...)
 	if err != nil {
-		return nil, utils.ErrorHandler(err, "Error retrieving data")
+		return nil, 0, utils.ErrorHandler(err, "Error retrieving data")
 	}
 	defer rows.Close()
 
@@ -37,11 +42,24 @@ func GetTeachersDbHandler(teachers []models.Teacher, r *http.Request) ([]models.
 		var teacher models.Teacher
 		err := rows.Scan(&teacher.ID, &teacher.FirstName, &teacher.LastName, &teacher.Email, &teacher.Class, &teacher.Subject)
 		if err != nil {
-			return nil, utils.ErrorHandler(err, "Error retrieving data")
+			return nil, 0, utils.ErrorHandler(err, "Error retrieving data")
 		}
 		teachers = append(teachers, teacher)
 	}
-	return teachers, err
+
+	// Get total count for students
+	countQuery := "SELECT COUNT(*) FROM teachers WHERE 1=1"
+	countQuery, countArgs := utils.AddFilters(r, countQuery, []interface{}{})
+	var totalTeachers int
+	err = db.QueryRow(countQuery, countArgs...).Scan(&totalTeachers)
+	if err != nil {
+		return nil, 0, utils.ErrorHandler(err, "error retrieving data")
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, 0, utils.ErrorHandler(err, "error retrieving data")
+	}
+	return teachers, totalTeachers, nil
 }
 
 func GetTeacherByID(id int) (models.Teacher, error) {

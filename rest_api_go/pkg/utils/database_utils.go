@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"strconv"
+
 	// "log"
 	"net/http"
 	"reflect"
@@ -94,4 +96,20 @@ func isValidSortField(field string) bool {
 		}
 	}
 	return false
+}
+
+// Implement pagination on students, like url?limit=10&page=2
+
+func GetPaginationParams(r *http.Request) (int, int) {
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	return page, limit
 }

@@ -49,9 +49,10 @@ func main() {
 	// secureMux := mw.Cors(rl.Middleware(mw.ResponseTimeMiddleware(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux)))))) // Apply HPP middleware with options
 	// secureMux := ApplyMiddlewares(mux, mw.Hpp(hppOptions), mw.Compression, mw.SecurityHeaders, mw.ResponseTimeMiddleware, rl.Middleware, mw.Cors)
 	router := router.MainRouter()
-	jwtMiddleware := mw.MiddlwaresExcludePaths(mw.JWTMiddleware, "/execs/login")
-	secureMux := jwtMiddleware(mw.SecurityHeaders(router))
+	// jwtMiddleware := mw.MiddlwaresExcludePaths(mw.JWTMiddleware, "/execs/login")
+	// secureMux := jwtMiddleware(mw.SecurityHeaders(router))
 	// secureMux := mw.SecurityHeaders(router)
+	secureMux := mw.XSSMiddleware(router)
 
 	// Create a custom server with TLS configuration
 	server := &http.Server{

@@ -39,7 +39,7 @@ func VerifyPassword(password, encodedHash string) error {
 	if subtle.ConstantTimeCompare(hash, hashedPassword) == 1 {
 		return nil
 	}
-	return ErrorHandler(errors.New("incorrect password"), "incorrect password")
+	return ErrorHandler(errors.New("incorrect username or password"), "invalid credentials")
 }
 
 func HashPassword(password string) (string, error) {

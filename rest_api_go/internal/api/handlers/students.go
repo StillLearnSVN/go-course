@@ -12,6 +12,9 @@ import (
 )
 
 func GetStudentsHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	var students []models.Student
 
 	page, limit := utils.GetPaginationParams(r)
@@ -41,6 +44,9 @@ func GetStudentsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOneStudentHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -58,6 +64,9 @@ func GetOneStudentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddStudentHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	var newStudents []models.Student
 	var rawStudents []map[string]interface{}
 
@@ -125,6 +134,9 @@ func AddStudentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateStudentHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -151,6 +163,9 @@ func UpdateStudentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PatchStudentsHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	var updates []map[string]interface{}
 	err := json.NewDecoder(r.Body).Decode(&updates)
 	if err != nil {
@@ -169,6 +184,9 @@ func PatchStudentsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PatchOneStudentHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -194,6 +212,9 @@ func PatchOneStudentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteOneStudentHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -220,6 +241,9 @@ func DeleteOneStudentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteStudentsHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	var ids []int
 	err := json.NewDecoder(r.Body).Decode(&ids)
 	if err != nil {

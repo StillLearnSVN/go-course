@@ -14,6 +14,9 @@ import (
 )
 
 func GetExecsHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager"); !ok {
+		return
+	}
 	var execs []models.Exec
 	execs, err := sqlconnect.GetExecsDbHandler(execs, r)
 	if err != nil {
@@ -36,6 +39,9 @@ func GetExecsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOneExecHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -53,6 +59,9 @@ func GetOneExecHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddExecsHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin"); !ok {
+		return
+	}
 	var newExecs []models.Exec
 	var rawExecs []map[string]interface{}
 
@@ -120,6 +129,9 @@ func AddExecsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PatchExecsHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin"); !ok {
+		return
+	}
 	var updates []map[string]interface{}
 	err := json.NewDecoder(r.Body).Decode(&updates)
 	if err != nil {
@@ -138,6 +150,9 @@ func PatchExecsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PatchOneExecHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -163,6 +178,9 @@ func PatchOneExecHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteOneExecHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -278,11 +296,24 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePasswordHandler(w http.ResponseWriter, r *http.Request) {
+	role, ok := authorizeRequest(w, r, "admin", "manager", "exec")
+	if !ok {
+		return
+	}
+
 	idStr := r.PathValue("id")
 	userId, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid exec ID", http.StatusBadRequest)
 		return
+	}
+
+	if role == "exec" {
+		ctxUserID, hasUserID := userIDFromContext(r)
+		if !hasUserID || ctxUserID != userId {
+			http.Error(w, "forbidden: cannot update password for another user", http.StatusForbidden)
+			return
+		}
 	}
 
 	var req models.UpdatePasswordRequest

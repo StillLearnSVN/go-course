@@ -12,6 +12,9 @@ import (
 )
 
 func GetTeachersHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 
 	var teachers []models.Teacher
 
@@ -42,6 +45,9 @@ func GetTeachersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 
 	idStr := r.PathValue("id")
 
@@ -61,6 +67,9 @@ func GetOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 
 	var newTeachers []models.Teacher
 	var rawTeachers []map[string]interface{}
@@ -131,6 +140,9 @@ func AddTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 // PUT  /teachers/{id}
 func UpdateTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -159,6 +171,9 @@ func UpdateTeacherHandler(w http.ResponseWriter, r *http.Request) {
 // PATCH /teachers
 
 func PatchTeachersHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 
 	var updates []map[string]interface{}
 	err := json.NewDecoder(r.Body).Decode(&updates)
@@ -180,6 +195,9 @@ func PatchTeachersHandler(w http.ResponseWriter, r *http.Request) {
 // PATCH /teachers/{id}
 // Note: Implementing PATCH is similar to PUT, but it allows partial updates.
 func PatchOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -207,6 +225,9 @@ func PatchOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 // DELETE /teachers/{id}
 // Note: Implementing DELETE is not shown here, but it would typically involve a simple DELETE SQL statement.
 func DeleteOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -233,6 +254,9 @@ func DeleteOneTeacherHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTeachersHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 
 	var ids []int
 	err := json.NewDecoder(r.Body).Decode(&ids)
@@ -259,6 +283,9 @@ func DeleteTeachersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetStudentsByTeacherId(w http.ResponseWriter, r *http.Request) {
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 	teacherId := r.PathValue("id")
 
 	var students []models.Student
@@ -284,9 +311,11 @@ func GetStudentsByTeacherId(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetStudentCountByTeacherId(w http.ResponseWriter, r *http.Request) {
-	teacherId := r.PathValue("id")
+	if _, ok := authorizeRequest(w, r, "admin", "manager", "exec"); !ok {
+		return
+	}
 
-	var studentCount int
+	teacherId := r.PathValue("id")
 
 	studentCount, err := sqlconnect.GetStudentCountByTeacherIdFromDb(teacherId)
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"restapi/internal/api/router"
 	"restapi/internal/repositories/sqlconnect"
 	"restapi/pkg/utils"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -36,20 +37,20 @@ func main() {
 		MinVersion: tls.VersionTLS12,
 	}
 
-	// rl := mw.NewRateLimiter(5, time.Minute) // Create a new rate limiter with a limit of 10 requests per minute
+	rl := mw.NewRateLimiter(5, time.Minute) // Create a new rate limiter with a limit of 10 requests per minute
 
-	// hppOptions := mw.HPPOptions{
-	// 	CheckQuery:             true,
-	// 	CheckBody:              true,
-	// 	ChecBodyForContentType: "application/x-www-form-urlencoded",
-	// 	Whitelist:              []string{"sortBy", "sortOrder", "name", "age", "class"},
-	// }
+	hppOptions := mw.HPPOptions{
+		CheckQuery:             true,
+		CheckBody:              true,
+		ChecBodyForContentType: "application/x-www-form-urlencoded",
+		Whitelist:              []string{"sortBy", "sortOrder", "name", "age", "class", "page", "limit"},
+	}
 
 	// secureMux := mw.Cors(rl.Middleware(mw.ResponseTimeMiddleware(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux)))))) // Apply HPP middleware with options
-	// secureMux := ApplyMiddlewares(mux, mw.Hpp(hppOptions), mw.Compression, mw.SecurityHeaders, mw.ResponseTimeMiddleware, rl.Middleware, mw.Cors)
 	router := router.MainRouter()
-	jwtMiddleware := mw.MiddlwaresExcludePaths(mw.JWTMiddleware, "/execs/login")
-	secureMux := jwtMiddleware(mw.SecurityHeaders(router))
+	jwtMiddleware := mw.MiddlwaresExcludePaths(mw.JWTMiddleware, "/execs/login", "/execs/forgotpassword", "/execs/resetpassword/reset")
+	secureMux := utils.ApplyMiddlewares(router, mw.SecurityHeaders, mw.Compression, mw.Hpp(hppOptions), mw.XSSMiddleware, jwtMiddleware, mw.ResponseTimeMiddleware, rl.Middleware, mw.Cors)
+	// secureMux := jwtMiddleware(mw.SecurityHeaders(router))
 	// secureMux := mw.SecurityHeaders(router)
 	// secureMux := mw.XSSMiddleware(router)
 
